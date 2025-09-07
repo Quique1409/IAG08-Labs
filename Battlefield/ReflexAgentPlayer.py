@@ -13,9 +13,9 @@ class ReflexAgentPlayer(IAPlayer):
             potential_targets = []
             for dr, dc in [(0,1), (0,-1), (1,0), (-1,0)]:
                 nr, nc = r + dr, c + dc
-                if 0 <= nr < self.opponent_grid_view.size and \
-                   0 <= nc < self.opponent_grid_view.size and \
-                   self.opponent_grid_view.grid[nr][nc] == '.':
+                if 0 <= nr < self.opponent_grid.size and \
+                   0 <= nc < self.opponent_grid.size and \
+                   self.opponent_grid.grid[nr][nc] == '.':
                     potential_targets.append((nr, nc))
 
             if potential_targets:
@@ -26,7 +26,7 @@ class ReflexAgentPlayer(IAPlayer):
 
         # De lo contrario, dispara a un lugar válido al azar
         while True:
-            row = random.randint(0, self.opponent_grid_view.size - 1)
-            col = random.randint(0, self.opponent_grid_view.size - 1)
-            if self.opponent_grid_view.grid[row][col] == '.':
+            row = random.randint(0, self.opponent_grid.size - 1)
+            col = random.randint(0, self.opponent_grid.size - 1)
+            if self.opponent_grid.grid[row][col] == '.':
                 return row, col

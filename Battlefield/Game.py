@@ -24,21 +24,21 @@ class Game:
             print("Tu tablero:")
             self.current_player.own_grid.display()
             print("Tu vista del tablero del oponente:")
-            self.current_player.opponent_grid_view.display(hide_boats=True)
+            self.current_player.opponent_grid.display(hide_boats=True)
 
         row, col = self.current_player.make_shot()
         result = self.other_player.own_grid.receive_shot(row, col)
 
         if result:
             if result == 'HIT':
-                self.current_player.opponent_grid_view.grid[row][col] = 'X'
+                self.current_player.opponent_grid.grid[row][col] = 'X'
             elif result == 'SUNK':
-                self.current_player.opponent_grid_view.grid[row][col] = 'X'
+                self.current_player.opponent_grid.grid[row][col] = 'X'
                 if not silent_mode:
                     sunk_boat = next(b for b in self.other_player.own_grid.boats if all(self.other_player.own_grid.grid[r][c]=='X' for r,c in b.positions))
                     print(f"¡Hundiste su {sunk_boat.name}!")
             else: # MISS
-                self.current_player.opponent_grid_view.grid[row][col] = 'M'
+                self.current_player.opponent_grid.grid[row][col] = 'M'
 
             # Lógica para que los agentes de IA actualicen su estado
             if isinstance(self.current_player, ReflexAgentPlayer):
