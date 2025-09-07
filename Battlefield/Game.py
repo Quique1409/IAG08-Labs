@@ -1,7 +1,7 @@
 import os
-import HumanPlayer
-import ReflexAgentPlayer
-import GoalBasedAgentPlayer
+from HumanPlayer import HumanPlayer
+from ReflexAgentPlayer import ReflexAgentPlayer
+from GoalBasedAgentPlayer import GoalBasedAgentPlayer
 class Game:
     """Manages the main game loop and player turns."""
     def __init__(self, player1, player2):
