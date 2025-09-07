@@ -1,32 +1,32 @@
 from IAPlayer import IAPlayer
 import random
 class ReflexAgentPlayer(IAPlayer):
-    """Simple Reflex AI. Hereda de IAPlayer."""
+    """Simple Reflex AI. Inherit from IAPlayer."""
     def __init__(self, name="Reflex AI"):
-        super().__init__(name)
-        self.last_hit = None
+        super().__init__(name) #Inherit the constructor of IAPlayer
+        self.last_hit = None # Store the coordinates of the last hit (if any)
 
     def make_shot(self):
-        # Si tuvimos un HIT en el último turno, dispara cerca
+        # If we get a hit last time, try adjacent cells
         if self.last_hit:
-            r, c = self.last_hit
-            potential_targets = []
-            for dr, dc in [(0,1), (0,-1), (1,0), (-1,0)]:
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < self.opponent_grid.size and \
-                   0 <= nc < self.opponent_grid.size and \
-                   self.opponent_grid.grid[nr][nc] == '.':
-                    potential_targets.append((nr, nc))
+            column, row = self.last_hit #row and column of the last hit
+            close_targets = [] #list of the valid targets next to the last hit
+            for x, y in [(0,1), (0,-1), (1,0), (-1,0)]:
+                new_column, new_row = column + x, row + y
+                if 0 <= new_row < self.opponent_grid.size and \
+                0 <= new_column < self.opponent_grid.size and \
+                self.opponent_grid.grid[new_column][new_row] == '.': #check that new coordinates are valid and not shot before        
+                    close_targets.append((new_column, new_row))
 
-            if potential_targets:
-                return random.choice(potential_targets)
+            if close_targets:
+                return random.choice(close_targets) #select a random target from the list
             else:
-                # Si todos los vecinos ya fueron atacados, limpia last_hit y dispara aleatoriamente
+                # If we already shoot all the neighbros, reset last_hit list
                 self.last_hit = None
 
-        # De lo contrario, dispara a un lugar válido al azar
+        # If we don't have a last hit or no valid neighbors, shoot randomly
         while True:
+            column = random.randint(0, self.opponent_grid.size - 1)
             row = random.randint(0, self.opponent_grid.size - 1)
-            col = random.randint(0, self.opponent_grid.size - 1)
-            if self.opponent_grid.grid[row][col] == '.':
-                return row, col
+            if self.opponent_grid.grid[column][row] == '.':
+                return column, row
