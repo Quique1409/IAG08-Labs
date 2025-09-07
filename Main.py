@@ -1,7 +1,14 @@
+from time import time
+import os
+import random
+from Game import Game
+from HumanPlayer import HumanPlayer
+from ReflexAgentPlayer import ReflexAgentPlayer
+from GoalBasedAgentPlayer import GoalBasedAgentPlayer
 def main():
     """Main function to run the Battleship game menu."""
     while True:
-        clear_screen()
+        os.system('cls' if os.name == 'nt' else 'clear')
         print(" B A T T L E S H I P")
         print("======================")
         print("1. Humano vs. IA Refleja")
@@ -12,13 +19,13 @@ def main():
 
         if choice == '1':
             player1 = HumanPlayer("Humano")
-            player2 = ReflexAgent()
+            player2 = ReflexAgentPlayer("Reflex AI")
             game = Game(player1, player2)
             game.run_game()
             input("\nPresiona Enter para volver al menú.")
         elif choice == '2':
             player1 = HumanPlayer("Humano")
-            player2 = GoalBasedAgent()
+            player2 = GoalBasedAgentPlayer("Goal-Based AI")
             game = Game(player1, player2)
             game.run_game()
             input("\nPresiona Enter para volver al menú.")
@@ -33,8 +40,8 @@ def main():
             stats = { "Reflex AI": 0, "Goal-Based AI": 0 }
             print(f"\nEjecutando {num_games} simulaciones...")
             for i in range(num_games):
-                p1 = ReflexAgent()
-                p2 = GoalBasedAgent()
+                p1 = ReflexAgentPlayer("Reflex AI")
+                p2 = GoalBasedAgentPlayer("Goal-Based AI")
                 # Intercambia aleatoriamente quién empieza para que sea justo
                 if random.choice([True, False]):
                     game = Game(p1, p2)

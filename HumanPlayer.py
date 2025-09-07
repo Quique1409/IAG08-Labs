@@ -1,4 +1,4 @@
-import Player
+from Player import Player
 class HumanPlayer(Player):
     """Representa a un jugador humano. Hereda de Player."""
     def place_boats(self):

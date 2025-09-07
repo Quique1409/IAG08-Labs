@@ -1,3 +1,7 @@
+import os
+import HumanPlayer
+import ReflexAgentPlayer
+import GoalBasedAgentPlayer
 class Game:
     """Manages the main game loop and player turns."""
     def __init__(self, player1, player2):
@@ -37,14 +41,14 @@ class Game:
                 self.current_player.opponent_grid_view.grid[row][col] = 'M'
 
             # Lógica para que los agentes de IA actualicen su estado
-            if isinstance(self.current_player, ReflexAgent):
+            if isinstance(self.current_player, ReflexAgentPlayer):
                 if result in ['HIT', 'SUNK']:
                     self.current_player.last_hit = (row, col)
                     if result == 'SUNK':
                         self.current_player.last_hit = None
                 else:
                     self.current_player.last_hit = None
-            if isinstance(self.current_player, GoalBasedAgent):
+            if isinstance(self.current_player, GoalBasedAgentPlayer):
                 if result in ['HIT', 'SUNK']:
                     self.current_player.mode = 'TARGET'
                     self.current_player.target_hits.append((row, col))

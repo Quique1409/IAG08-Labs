@@ -1,4 +1,5 @@
-import Player
+from Player import Player
+import random
 class IAPlayer(Player):
     """Clase base para los agentes de IA. Hereda de Player."""
     def place_boats(self):

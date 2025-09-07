@@ -1,4 +1,5 @@
 from IAPlayer import IAPlayer
+import random
 class GoalBasedAgentPlayer(IAPlayer):
     """Un agente más avanzado basado en objetivos. Hereda de IAPlayer."""
     def __init__(self, name="Goal-Based AI"):

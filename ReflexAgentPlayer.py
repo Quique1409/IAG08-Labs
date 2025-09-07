@@ -1,4 +1,5 @@
-import IAPlayer
+from IAPlayer import IAPlayer
+import random
 class ReflexAgentPlayer(IAPlayer):
     """Un agente reflejo simple. Hereda de IAPlayer."""
     def __init__(self, name="Reflex AI"):

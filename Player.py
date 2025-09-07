@@ -1,5 +1,5 @@
-import Boat
-import Mesh
+from Boat import Boat
+from Mesh import Mesh
 class Player:
     """Clase padre para todos los tipos de jugadores."""
     def __init__(self, name):
