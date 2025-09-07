@@ -1,15 +1,15 @@
 from Player import Player
 class HumanPlayer(Player):
-    """Representa a un jugador humano. Hereda de Player."""
+    """Son class for a real player."""
     def place_boats(self):
-        print(f"\n{self.name}, es hora de colocar tus barcos.")
+        print(f"\n{self.name}, put your boats on the board.")
         for boat in self.boat_fleet:
             placed = False
             while not placed:
                 self.own_grid.display()
-                print(f"Colocando {boat.name} (tamaño: {boat.size})")
+                print(f"Put your {boat.name} (Size: {boat.size})")
                 try:
-                    prompt = f"Ingresa coordenada de inicio (ej. A5) y orientación (H/V), ej. A5 H: "
+                    prompt = f"Start coordinate (ej. A5) y orientation (H/V), example: A5 H: "
                     placement = input(prompt).strip().upper().split()
                     coord_str, orientation = placement[0], placement[1]
 

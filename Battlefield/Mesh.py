@@ -1,10 +1,11 @@
 class Mesh:
     """Represents the game grid for a player."""
     def __init__(self, size=10):
+        """Initializes a size x size grid."""
         self.size = size
         # Grid representations:
         # '.' for empty, 'O' for boat, 'X' for hit, 'M' for miss
-        self.grid = [['.' for _ in range(size)] for _ in range(size)]
+        self.grid = [['.' for _ in range(size)] for _ in range(size)] #Iniciatlize the grid with '.'
         self.boats = []
 
     def display(self, hide_boats=False):
@@ -21,7 +22,7 @@ class Mesh:
             print(f"{row_num} " + " ".join(display_row))
         print()
 
-    def _can_place_boat(self, boat, row, col, orientation):
+    def verify_placement(self, boat, row, col, orientation):
         """Checks if a boat can be placed at a specific location."""
         if orientation == 'H':
             if col + boat.size > self.size:
@@ -39,7 +40,7 @@ class Mesh:
 
     def place_boat(self, boat, row, col, orientation):
         """Places a boat on the grid."""
-        if not self._can_place_boat(boat, row, col, orientation):
+        if not self.verify_placement(boat, row, col, orientation):
             return False
 
         boat.positions = []
@@ -68,13 +69,16 @@ class Mesh:
                 if (row, col) in boat.positions:
                     boat.hits += 1
                     if boat.is_sunk():
-                        print(f"You sunk their {boat.name}!")
+                        print(f"You sunk their {boat.name}. Lenght: {boat.size}")
                         return 'SUNK'
                     return 'HIT'
         else:
             self.grid[row][col] = 'M'
-            return 'MISS'
+            return 'MISSED'
 
-    def all_boats_sunk(self):
+    def fleet_sunk(self):
         """Checks if all boats on this grid are sunk."""
-        return all(boat.is_sunk() for boat in self.boats)
+        for boat in self.boats:
+            if boat.is_sunk():
+                return True
+        return False
