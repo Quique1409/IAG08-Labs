@@ -5,10 +5,10 @@ class Player:
     def __init__(self, name):
         self.name = name
         self.own_grid = Mesh()
-        self.opponent_grid_view = Mesh() # Lo que este jugador ve del oponente
+        self.opponent_grid = Mesh() # View of opponent's grid
         self.boat_fleet = [
-            Boat(5, "Carrier"), Boat(4, "Battleship"),
-            Boat(3, "Cruiser"), Boat(3, "Submarine"), Boat(2, "Destroyer")
+            Boat(5, "Carrier (Length: 5)"), Boat(4, "Battleship (Length: 4)"),
+            Boat(3, "Cruiser (Length: 3)"), Boat(3, "Submarine (Length: 3)"), Boat(2, "Destroyer (Length: 2)")
         ]
 
     def place_boats(self):

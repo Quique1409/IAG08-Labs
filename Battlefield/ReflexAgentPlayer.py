@@ -1,7 +1,7 @@
 from IAPlayer import IAPlayer
 import random
 class ReflexAgentPlayer(IAPlayer):
-    """Un agente reflejo simple. Hereda de IAPlayer."""
+    """Simple Reflex AI. Hereda de IAPlayer."""
     def __init__(self, name="Reflex AI"):
         super().__init__(name)
         self.last_hit = None

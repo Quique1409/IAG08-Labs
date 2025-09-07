@@ -13,8 +13,8 @@ class Game:
 
     def setup_game(self):
         """Initializes the game by having players place their boats."""
-        self.player1.place_boats()
-        self.player2.place_boats()
+        self.player1.place_boats_randomly()
+        self.player2.place_boats_randomly()
 
     def play_turn(self, silent_mode=False):
         """Executes a single turn for the current player."""

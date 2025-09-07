@@ -34,9 +34,9 @@ class HumanPlayer(Player):
                 coord_str = input(f"{self.name}, ingresa la coordenada para tu disparo (ej. B7): ").strip().upper()
                 col = ord(coord_str[0]) - ord('A')
                 row = int(coord_str[1:]) - 1
-                if not (0 <= row < self.opponent_grid_view.size and 0 <= col < self.opponent_grid_view.size):
+                if not (0 <= row < self.opponent_grid.size and 0 <= col < self.opponent_grid_view.size):
                     raise ValueError("Coordenadas fuera del tablero.")
-                if self.opponent_grid_view.grid[row][col] != '.':
+                if self.opponent_grid.grid[row][col] != '.':
                     print("Ya has disparado a esa coordenada. Intenta de nuevo.")
                     continue
                 return row, col
