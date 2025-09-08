@@ -1,47 +1,54 @@
 from IAPlayer import IAPlayer
 import random
 class GoalBasedAgentPlayer(IAPlayer):
-    """Un agente más avanzado basado en objetivos. Hereda de IAPlayer."""
+    """Agent with behaviors based on a goal. Inherit from IAPlayer."""
     def __init__(self, name="Goal-Based AI"):
         super().__init__(name)
-        self.mode = 'HUNT' # HUNT (cazar) o TARGET (apuntar)
-        self.target_hits = []
+        self.mode = 'HUNT' # Initialize in HUNT state
+        """The hunt state let the agent shoot in big spaces between shots for finding a boat."""
+        self.target_hits = [] #list of reached hits on a target boat
 
     def make_shot(self):
         if self.mode == 'TARGET':
-            shot = self._target_shot()
+            """When a shot hits a boat, the agent passesd to TARGET mode.
+            The agent will try to sink the boat by shooting around the hit positions, remembering all the hit positions in target_hits list."""
+            shot = self.target_shot()
             if shot:
                 return shot
             else:
-                # El modo TARGET falló (¿quizás se hundió?), vuelve a HUNT
+                # If TARGET mode failed (maybe the boat sank?), revert to HUNT
                 self.mode = 'HUNT'
                 self.target_hits = []
 
-        # Modo HUNT
-        # Usa un patrón de tablero de ajedrez para una caza más eficiente
+        # In case of HUNT state 
+        # Use a pattern to cover more space efficiently
         possible_shots = []
-        for r in range(self.opponent_grid.size):
-            for c in range(self.opponent_grid.size):
-                if (r + c) % 2 == 0 and self.opponent_grid.grid[r][c] == '.':
-                    possible_shots.append((r, c))
-        
-        if not possible_shots: # Si el patrón de ajedrez está completo, llena los huecos
-            for r in range(self.opponent_grid.size):
-                for c in range(self.opponent_grid.size):
-                    if self.opponent_grid.grid[r][c] == '.':
-                        possible_shots.append((r,c))
+        for rows in range(self.opponent_grid.size):
+            for columns in range(self.opponent_grid.size): #for cover more space, the agent shoots with a minium distance of 2 cells
+                if (rows + columns) % 2 == 0 and self.opponent_grid.grid[rows][columns] == '.': #if the plus of the current row and column is pair and void
+                    possible_shots.append((rows, columns)) #add the cell to the possible shots
 
-        return random.choice(possible_shots) if possible_shots else self._random_fallback_shot()
+        if not possible_shots: # If we dont have any possible shots left in the pattern, shoot anywhere valid
+            for rows in range(self.opponent_grid.size):
+                for column in range(self.opponent_grid.size):
+                    if self.opponent_grid.grid[rows][column] == '.':
+                        possible_shots.append((rows,column))
+
+        if possible_shots:
+            shot = random.choice(possible_shots)
+        else:
+            shot = self.random_shot()
+        return shot
     
-    def _random_fallback_shot(self):
-        """Disparo aleatorio si no quedan más opciones."""
+    def random_shot(self):
+        """If we dont have tuples in possible_shots, shoot randomly where it can."""
         while True:
             row = random.randint(0, self.opponent_grid.size - 1)
             col = random.randint(0, self.opponent_grid.size - 1)
             if self.opponent_grid.grid[row][col] == '.':
                 return row, col
 
-    def _target_shot(self):
+    def target_shot(self):
         """Lógica para disparar cuando un barco ha sido golpeado pero no hundido."""
         potential_targets = set()
         for r, c in self.target_hits:
