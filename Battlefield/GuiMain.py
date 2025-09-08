@@ -162,6 +162,7 @@ class GamePage(tk.Frame):
         self.player2 = player2
         self.game = Game(self.player1, self.player2) # La clase Game solo guarda el estado de los barcos
 
+        self.disable_opponent_grid() #se desabilita el board 
         #empieza colocación
         self.ships_to_place = list(self.player1.boat_fleet) #jugador
         self.player2.place_boats_randomly() #IA
