@@ -258,6 +258,13 @@ class GamePage(tk.Frame):
 
         result = self.game.other_player.own_grid.receive_shot(row, col) #Dispara al player real (usuario)
 
+         # Update the AI's own tracking grid so it doesn't shoot here again.
+        if result in ['HIT', 'SUNK']:
+            self.game.current_player.opponent_grid.grid[row][col] = "X"
+        elif result == 'MISS':
+            self.game.current_player.opponent_grid.grid[row][col] = "M"
+   
+
         #Se actualzia el resultado interno de la IA
         self.update_ai_state(self.game.current_player, result, row, col)
         self.update_boards() #se actualiza el board del juego.
