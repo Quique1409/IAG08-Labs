@@ -211,7 +211,7 @@ class GamePage(tk.Frame):
         if self.ships_to_place:
             # Toma el siguiente barco de la lista
             current_ship = self.ships_to_place[0]
-            self.status_label.config(text=f"Place your {current_ship.name} (Size: {current_ship.size})")
+            self.status_label.config(text=f"Place your {current_ship.name}")
         else:
             # Si no quedan barcos, termina la fase de colocación
             self.end_placement_phase()
