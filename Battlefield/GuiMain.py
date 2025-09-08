@@ -65,7 +65,7 @@ class BattleshipGUI(tk.Tk):
 
     def start_game(self, player2_class, player2_name):
         """Play game, and configuration the party"""
-        self.frames["GamePage"].setup_game(HumanPlayer("Humane"), player2_class(player2_name))
+        self.frames["GamePage"].setup_game(HumanPlayer("Player"), player2_class(player2_name))
         self.show_frame("GamePage")
 
     def start_simulation(self):
@@ -84,19 +84,19 @@ class MainMenu(tk.Frame):
         # Buttons styles
         button_style = {'font': controller.button_font, 'height': 2, 'width': 30}
 
-        btn1 = tk.Button(self, text="Humane vs simple reflex", **button_style,
+        btn1 = tk.Button(self, text="Player vs simple reflex (Easy)", **button_style,
                         command=lambda: controller.start_game(ReflexAgentPlayer, "Reflex AI"))
         btn1.pack(pady=10)
 
-        btn2 = tk.Button(self, text="Humane vs goal-based", **button_style,
+        btn2 = tk.Button(self, text="Player vs goal-based (Hard)", **button_style,
                         command=lambda: controller.start_game(GoalBasedAgentPlayer, "Goal-Based AI"))
         btn2.pack(pady=10)
 
-        btn3 = tk.Button(self, text="Simultaion: reflex Agent vs. Goal Based", **button_style,
+        btn3 = tk.Button(self, text="Simulation: Reflex vs. Goal Based", **button_style,
                         command=lambda: controller.start_simulation())
         btn3.pack(pady=10)
 
-        btn4 = tk.Button(self, text="Salir", **button_style,
+        btn4 = tk.Button(self, text="Exit", **button_style,
                         command=self.quit)
         btn4.pack(pady=10)
 
@@ -107,7 +107,7 @@ class GamePage(tk.Frame):
         super().__init__(parent, bg=WINDOW_BG)
         self.controller = controller
         self.game = None
-        self.player1 = None #Humane
+        self.player1 = None #Player
         self.player2 = None #IA
         self.opponent_buttons = []
 
@@ -235,7 +235,7 @@ class GamePage(tk.Frame):
 
         #Se acrtualiza el board para el seguimiento del jugador
         if result in ['HIT', 'SUNK']:
-            self.game.current_player.opponent_grid.grid[row][col] = "H"
+            self.game.current_player.opponent_grid.grid[row][col] = "X"
         else:
             self.game.current_player.opponent_grid.grid[row][col] = "M"
 
@@ -318,7 +318,7 @@ class GamePage(tk.Frame):
                     cell = p1_grid[r][c]
                     if cell == 'S': # Casilla sin nada
                         color = SHIP_COLOR
-                    elif cell == 'H': # Hit
+                    elif cell == 'X': # Hit
                         color = HIT_COLOR
                     elif cell == 'M': # Miss
                         color = MISS_COLOR
@@ -331,7 +331,7 @@ class GamePage(tk.Frame):
                 for c in range(10):
                     cell = p2_tracking_grid[r][c]
                     color = WATER_COLOR
-                    if cell == 'H':
+                    if cell == 'X':
                         color = HIT_COLOR
                     elif cell == 'M':
                         color = MISS_COLOR
