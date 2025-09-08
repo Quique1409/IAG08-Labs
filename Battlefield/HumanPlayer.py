@@ -19,7 +19,7 @@ class HumanPlayer(Player):
                     if orientation not in ['H', 'V']:
                         raise ValueError("Orientación inválida.")
                     if not (0 <= row < self.own_grid.size and 0 <= col < self.own_grid.size):
-                         raise ValueError("Coordenadas fuera del tablero.")
+                        raise ValueError("Coordenadas fuera del tablero.")
 
                     if self.own_grid.place_boat(boat, row, col, orientation):
                         placed = True
