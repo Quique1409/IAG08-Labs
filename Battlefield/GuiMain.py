@@ -99,7 +99,15 @@ class MainMenu(tk.Frame):
         btn4 = tk.Button(self, text="Exit", **button_style,
                         command=self.quit)
         btn4.pack(pady=10)
+        
+# ---CREDITS SECTION ---
+        credits_text = "Developed by:\nLeón Vargas Luis Guillermo\nMedrano Solano Enrique\nRamírez Valdovinos Eric\nRodríguez Zamora Joshua"
+        credits_font = tkfont.Font(family=FONT_FAMILY, size=10, slant="italic")
 
+        credits_label = tk.Label(self, text=credits_text, font=credits_font,
+                                 bg=WINDOW_BG, fg="#333333")
+        
+        credits_label.pack(pady=(20, 10)) # (padding_on_top, padding_on_bottom)
 
 class GamePage(tk.Frame):
     """The game window"""
@@ -323,7 +331,7 @@ class GamePage(tk.Frame):
                     x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
                     color = WATER_COLOR
                     cell = p1_grid[r][c]
-                    if cell == 'S': # Casilla sin nada
+                    if cell == 'O': # Casilla sin nada
                         color = SHIP_COLOR
                     elif cell == 'X': # Hit
                         color = HIT_COLOR
