@@ -21,7 +21,7 @@ CELL_SIZE = 35
 BOARD_WIDTH = BOARD_HEIGHT = 10 * CELL_SIZE
 PADDING = 10
 #Escoger colores de los fondos
-WINDOW_BG = "#D3D3D3" 
+WINDOW_BG = "#98DA4C" 
 WATER_COLOR = "#ADD8E6"
 SHIP_COLOR = "#A9A9A9"
 HIT_COLOR = "#FF6347"
@@ -230,7 +230,7 @@ class GamePage(tk.Frame):
     def on_grid_click(self, row, col):
         """The mouse event from player real turn"""
         self.disable_opponent_grid() #se evitan click accidenatales
-        result = self.game.other_player.own_grid.receive_shot((row, col)) #registro del disparo (script Game)
+        result = self.game.other_player.own_grid.receive_shot(row, col) #registro del disparo (script Game)
 
         #Se acrtualiza el board para el seguimiento del jugador
         if result in ['HIT', 'SUNK']:
