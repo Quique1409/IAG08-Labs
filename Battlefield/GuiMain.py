@@ -107,7 +107,7 @@ class MainMenu(tk.Frame):
         credits_label = tk.Label(self, text=credits_text, font=credits_font,
                                  bg=WINDOW_BG, fg="#333333")
         
-        credits_label.pack(pady=(20, 10)) # (padding_on_top, padding_on_bottom)
+        credits_label.pack(pady=(20, 10)) 
 
 class GamePage(tk.Frame):
     """The game window"""
@@ -131,28 +131,54 @@ class GamePage(tk.Frame):
 
         top_frame = tk.Frame(self, bg=WINDOW_BG)
         top_frame.pack(pady=10)
-        self.status_label = tk.Label(top_frame, text="Started..", font=controller.label_font, bg=WINDOW_BG, width=50)
+        self.status_label = tk.Label(top_frame, text="Starting..", font=controller.label_font, bg=WINDOW_BG, width=50)
         self.status_label.pack()
 
         boards_frame = tk.Frame(self, bg=WINDOW_BG)
         boards_frame.pack(padx=20, pady=10)
         
-        # The user board
-        p1_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
-        p1_frame.pack(side="left", padx=10)
-        tk.Label(p1_frame, text="Board", font=controller.button_font, bg=WINDOW_BG).pack()
-        self.player1_canvas = tk.Canvas(p1_frame, width=BOARD_WIDTH, height=BOARD_HEIGHT, bg=WATER_COLOR)
-        self.player1_canvas.pack()
+        # Player 1 (Your Board) Frame Setup with Coordinates
+        # ==========================================================
+        p1_coord_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
+        p1_coord_frame.pack(side="left", padx=10)
 
+        tk.Label(p1_coord_frame, text="Your Board", font=controller.button_font, bg=WINDOW_BG).grid(row=0, column=1, columnspan=10, pady=5)
+
+        # Column Headers (A, B, C...)
+        for i in range(10):
+            col_char = chr(ord('A') + i)
+            tk.Label(p1_coord_frame, text=col_char, font=controller.label_font, bg=WINDOW_BG).grid(row=1, column=i + 1)
+
+        # Row Headers (1, 2, 3...)
+        for i in range(10):
+            row_num = str(i + 1)
+            tk.Label(p1_coord_frame, text=row_num, font=controller.label_font, bg=WINDOW_BG, padx=5).grid(row=i + 2, column=0)
+
+        self.player1_canvas = tk.Canvas(p1_coord_frame, width=BOARD_WIDTH, height=BOARD_HEIGHT, bg=WATER_COLOR, highlightthickness=0)
+        self.player1_canvas.grid(row=2, column=1, rowspan=10, columnspan=10)
         self.player1_canvas.bind("<Button-1>", self.on_canvas_click)
 
-        # Opponent's board
-        p2_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
-        p2_frame.pack(side="right", padx=10)
-        tk.Label(p2_frame, text="Opponent Board", font=controller.button_font, bg=WINDOW_BG).pack()
-        self.player2_board = tk.Frame(p2_frame)
-        self.player2_board.pack()
-        self._create_opponent_grid()
+        # ==========================================================
+        # Opponent's Board Frame Setup with Coordinates
+        # ==========================================================
+        p2_coord_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
+        p2_coord_frame.pack(side="right", padx=10)
+
+        tk.Label(p2_coord_frame, text="Opponent's Board", font=controller.button_font, bg=WINDOW_BG).grid(row=0, column=1, columnspan=10, pady=5)
+
+        # Column Headers (A, B, C...)
+        for i in range(10):
+            col_char = chr(ord('A') + i)
+            tk.Label(p2_coord_frame, text=col_char, font=controller.label_font, bg=WINDOW_BG).grid(row=1, column=i + 1)
+        
+        # Row Headers (1, 2, 3...) on the right side
+        for i in range(10):
+            row_num = str(i + 1)
+            tk.Label(p2_coord_frame, text=row_num, font=controller.label_font, bg=WINDOW_BG, padx=5).grid(row=i + 2, column=11)
+
+        self.player2_board = tk.Frame(p2_coord_frame)
+        self.player2_board.grid(row=2, column=1, rowspan=10, columnspan=10)
+        self._create_opponent_grid() # This is now self-contained
 
         # Botón para volver al menú
         self.back_button = tk.Button(self, text="Menu", font=controller.button_font,
@@ -185,7 +211,7 @@ class GamePage(tk.Frame):
         if self.ships_to_place:
             # Toma el siguiente barco de la lista
             current_ship = self.ships_to_place[0]
-            self.status_label.config(text=f"Coloca tu {current_ship.name} (Tamaño: {current_ship.size})")
+            self.status_label.config(text=f"Place your {current_ship.name} (Size: {current_ship.size})")
         else:
             # Si no quedan barcos, termina la fase de colocación
             self.end_placement_phase()
@@ -221,17 +247,19 @@ class GamePage(tk.Frame):
         # Vuelve a mostrar el botón de "Volver al Menú"
         self.back_button.pack(pady=20)
         
-        self.status_label.config(text="¡Flota desplegada! Comienza la batalla. ¡Es tu turno!")
+        self.status_label.config(text="Your fleet has been deployed! The battle begins.\n It's your turn!")
         self.enable_opponent_grid()
 
     def _create_opponent_grid(self):
-        """Create the matrix from board"""
+        """Creates the button matrix for the opponent's board."""
         self.opponent_buttons = []
-        for r in range(10): #row
+        for r in range(10): # row
             row_list = []
-            for c in range(10): #column
+            for c in range(10): # column
+                # The parent is self.player2_board
                 btn = tk.Button(self.player2_board, text="", width=2, height=1, bg=WATER_COLOR,
                                 command=lambda row=r, col=c: self.on_grid_click(row, col))
+                # The grid inside this frame starts at (0, 0)
                 btn.grid(row=r, column=c)
                 row_list.append(btn)
             self.opponent_buttons.append(row_list)
@@ -248,7 +276,8 @@ class GamePage(tk.Frame):
             self.game.current_player.opponent_grid.grid[row][col] = "M"
 
         self.update_boards() #Actualzia GUI
-        self.status_label.config(text= f"You shot in ({row}, {col})... {result}! IA turn." )
+        coord = f"{chr(ord('A') + col)}{row + 1}" # Convertimos (r,c) a "A1"
+        self.status_label.config(text= f"You targetted {coord}... {result}!\n Opponent turn." )
 
         #Termino el juego??
         if self.game.other_player.has_lost():
@@ -278,7 +307,7 @@ class GamePage(tk.Frame):
         self.update_boards() #se actualiza el board del juego.
 
         coord = f"{chr(ord('A') + col)}{row + 1}" # Convertimos (r,c) a "A1"
-        self.status_label.config(text=f"The AI ​​shot in {coord}... ¡{result}! It's your turn")
+        self.status_label.config(text=f"The opponent fired at {coord}... ¡{result}!\n It's your turn")
 
     #Termino el juego??
         if self.game.other_player.has_lost():
