@@ -12,7 +12,7 @@ class GoalBasedAgentPlayer(IAPlayer):
         if self.mode == 'TARGET':
             """When a shot hits a boat, the agent passesd to TARGET mode.
             The agent will try to sink the boat by shooting around the hit positions, remembering all the hit positions in target_hits list."""
-            shot = self.target_shot()
+            shot = self.boat_blood()
             if shot:
                 return shot
             else:
@@ -48,18 +48,18 @@ class GoalBasedAgentPlayer(IAPlayer):
             if self.opponent_grid.grid[row][col] == '.':
                 return row, col
 
-    def target_shot(self):
-        """Lógica para disparar cuando un barco ha sido golpeado pero no hundido."""
-        potential_targets = set()
-        for r, c in self.target_hits:
-            for dr, dc in [(0,1), (0,-1), (1,0), (-1,0)]:
-                nr, nc = r + dr, c + dc
+    def boat_blood(self):
+        """If we are in TARGET mode, try to sink the boat by shooting around the hit positions."""
+        neighbors_cells = set() # Use a set to avoid duplicates
+        for rows, columns in self.target_hits:
+            for x, y in [(0,1), (0,-1), (1,0), (-1,0)]:
+                nr, nc = rows + x, columns + y
                 if 0 <= nr < self.opponent_grid.size and \
                    0 <= nc < self.opponent_grid.size and \
                    self.opponent_grid.grid[nr][nc] == '.':
-                    potential_targets.add((nr, nc))
+                    neighbors_cells.add((nr, nc))
         
-        # Si tenemos múltiples aciertos, intentamos determinar la orientación
+        # We try to be more intelligent if we have more than one hit
         if len(self.target_hits) > 1:
             first_hit = self.target_hits[0]
             second_hit = self.target_hits[1]
@@ -83,7 +83,8 @@ class GoalBasedAgentPlayer(IAPlayer):
             if valid_line_targets:
                 return random.choice(valid_line_targets)
 
-        if potential_targets:
-            return random.choice(list(potential_targets))
-        
-        return None # No se encontraron objetivos válidos
+        if neighbors_cells:
+            return random.choice(list(neighbors_cells))
+
+        return None # No valid targets found
+    
