@@ -34,19 +34,7 @@ class GoalBasedAgentPlayer(IAPlayer):
                     if self.opponent_grid.grid[rows][column] == '.':
                         possible_shots.append((rows,column))
 
-        if possible_shots:
-            shot = random.choice(possible_shots)
-        else:
-            shot = self.random_shot()
-        return shot
-    
-    def random_shot(self):
-        """If we dont have tuples in possible_shots, shoot randomly where it can."""
-        while True:
-            row = random.randint(0, self.opponent_grid.size - 1)
-            col = random.randint(0, self.opponent_grid.size - 1)
-            if self.opponent_grid.grid[row][col] == '.':
-                return row, col
+        return random.choice(possible_shots)
 
     def boat_blood(self):
         """If we are in TARGET mode, try to sink the boat by shooting around the hit positions."""
@@ -60,10 +48,10 @@ class GoalBasedAgentPlayer(IAPlayer):
                     neighbors_cells.add((nr, nc))
         
         # We try to be more intelligent if we have more than one hit
-        if len(self.target_hits) > 1:
+        if len(self.target_hits) > 1: # If we already have two hits, we can determine the orientation if they are next to the other
             first_hit = self.target_hits[0]
             second_hit = self.target_hits[1]
-            is_horizontal = first_hit[0] == second_hit[0]
+            is_horizontal = first_hit[0] == second_hit[0] # Check if they are in the same row with the first value of the tuple
             
             line_targets = []
             if is_horizontal:
