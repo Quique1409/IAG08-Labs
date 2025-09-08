@@ -92,7 +92,7 @@ class MainMenu(tk.Frame):
                         command=lambda: controller.start_game(GoalBasedAgentPlayer, "Goal-Based AI"))
         btn2.pack(pady=10)
 
-        btn3 = tk.Button(self, text="Simultaion: IA vs. IA", **button_style,
+        btn3 = tk.Button(self, text="Simultaion: reflex Agent vs. Goal Based", **button_style,
                         command=lambda: controller.start_simulation())
         btn3.pack(pady=10)
 
@@ -107,9 +107,19 @@ class GamePage(tk.Frame):
         super().__init__(parent, bg=WINDOW_BG)
         self.controller = controller
         self.game = None
-        self.player1 = None
-        self.player2 = None
+        self.player1 = None #Humane
+        self.player2 = None #IA
         self.opponent_buttons = []
+
+        #Controles para la fase de colocación
+        self.placement_frame = tk.Frame(self, bg=WINDOW_BG)
+        tk.Label(self.placement_frame, text="Orientation:", font=controller.label_font, bg=WINDOW_BG).pack(side="left", padx=5)
+        self.orientation_var = tk.StringVar(value='H') # Por defecto Horizontal
+        horiz_radio = tk.Radiobutton(self.placement_frame, text="Horizontal", variable=self.orientation_var, value='H', font=controller.label_font, bg=WINDOW_BG)
+        horiz_radio.pack(side="left")
+        vert_radio = tk.Radiobutton(self.placement_frame, text="Vertical", variable=self.orientation_var, value='V', font=controller.label_font, bg=WINDOW_BG)
+        vert_radio.pack(side="left")
+
 
         top_frame = tk.Frame(self, bg=WINDOW_BG)
         top_frame.pack(pady=10)
@@ -126,7 +136,9 @@ class GamePage(tk.Frame):
         self.player1_canvas = tk.Canvas(p1_frame, width=BOARD_WIDTH, height=BOARD_HEIGHT, bg=WATER_COLOR)
         self.player1_canvas.pack()
 
-        # 
+        self.player1_canvas.bind("<Button-1>", self.on_canvas_click)
+
+        # Opponent's board
         p2_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
         p2_frame.pack(side="right", padx=10)
         tk.Label(p2_frame, text="Opponent Board", font=controller.button_font, bg=WINDOW_BG).pack()
@@ -135,9 +147,9 @@ class GamePage(tk.Frame):
         self._create_opponent_grid()
 
         # Botón para volver al menú
-        back_button = tk.Button(self, text="Menu", font=controller.button_font,
-                                command=self.go_to_main_menu)
-        back_button.pack(pady=20)
+        self.back_button = tk.Button(self, text="Menu", font=controller.button_font,
+                                    command=self.go_to_main_menu)
+        self.back_button.pack(pady=20)
 
     def go_to_main_menu(self):
         """Displays a confirmation and returns to the main menu."""
@@ -148,18 +160,67 @@ class GamePage(tk.Frame):
         """The new game congiguration"""
         self.player1 = player1
         self.player2 = player2
-        self.game = Game(self.player1, self.player2) # La clase Game se encarga de colocar los barcos
+        self.game = Game(self.player1, self.player2) # La clase Game solo guarda el estado de los barcos
+
+        #empieza colocación
+        self.ships_to_place = list(self.player1.boat_fleet) #jugador
+        self.player2.place_boats_randomly() #IA
         
         self.update_boards()
-        self.status_label.config(text="Your turn! Click on your opponent's board to shoot.")
+        self.back_button.pack_forget()
+        self.placement_frame.pack(pady=10)
+        self.start_next_placement()
+
+    def start_next_placement(self):
+        """Prepares the next ship to be placed by the player."""
+        if self.ships_to_place:
+            # Toma el siguiente barco de la lista
+            current_ship = self.ships_to_place[0]
+            self.status_label.config(text=f"Coloca tu {current_ship.name} (Tamaño: {current_ship.size})")
+        else:
+            # Si no quedan barcos, termina la fase de colocación
+            self.end_placement_phase()
+
+    def on_canvas_click(self, event):
+        """Handles the click on the player's board during the placement phase."""
+        # Si no estamos en fase de colocación, no hace nada
+        if not self.ships_to_place:
+            return
+
+        # Convierte las coordenadas del clic (pixeles) a coordenadas de la cuadrícula (fila, columna)
+        col = event.x // CELL_SIZE
+        row = event.y // CELL_SIZE
+
+        current_ship = self.ships_to_place[0]
+        orientation = self.orientation_var.get()
+
+        # Intenta colocar el barco usando el método de la clase Grid
+        if self.player1.own_grid.place_boat(current_ship, row, col, orientation):
+            # Si se pudo colocar, lo elimina de la lista y pasa al siguiente
+            self.ships_to_place.pop(0)
+            self.update_boards()
+            self.start_next_placement()
+        else:
+            # Si no se pudo, muestra un aviso
+            messagebox.showwarning("Invalid Position", "You cannot place the ship there. Try another position")
+
+    def end_placement_phase(self):
+        """Colocation phase finished"""
+        # Oculta los controles de colocación
+        self.placement_frame.pack_forget()
+
+        # Vuelve a mostrar el botón de "Volver al Menú"
+        self.back_button.pack(pady=20)
+        
+        self.status_label.config(text="¡Flota desplegada! Comienza la batalla. ¡Es tu turno!")
         self.enable_opponent_grid()
 
     def _create_opponent_grid(self):
         """Create the matrix from board"""
         self.opponent_buttons = []
-        for r in range(10):
+        for r in range(10): #row
             row_list = []
-            for c in range(10):
+            for c in range(10): #column
                 btn = tk.Button(self.player2_board, text="", width=2, height=1, bg=WATER_COLOR,
                                 command=lambda row=r, col=c: self.on_grid_click(row, col))
                 btn.grid(row=r, column=c)
@@ -167,62 +228,113 @@ class GamePage(tk.Frame):
             self.opponent_buttons.append(row_list)
 
     def on_grid_click(self, row, col):
-        """The mouse event"""
-        self.disable_opponent_grid()
-        result = self.game.make_move((row, col))
-        self.update_boards()
+        """The mouse event from player real turn"""
+        self.disable_opponent_grid() #se evitan click accidenatales
+        result = self.game.other_player.own_grid.receive_shot((row, col)) #registro del disparo (script Game)
 
-        if self.game.is_game_over(): #Se puede cambiar
+        #Se acrtualiza el board para el seguimiento del jugador
+        if result in ['HIT', 'SUNK']:
+            self.game.current_player.opponent_grid.grid[row][col] = "H"
+        else:
+            self.game.current_player.opponent_grid.grid[row][col] = "M"
+
+        self.update_boards() #Actualzia GUI
+        self.status_label.config(text= f"You shot in ({row}, {col})... {result}! IA turn." )
+
+        #Termino el juego??
+        if self.game.other_player.has_lost():
+            self.game.winner = self.game.current_player
             self.end_game()
             return
         
-        self.status_label.config(text=f"You shot in ({row}, {col})... ¡{result}! Turn the IA.")
+        #Si sigue el juego entonces...
+        self.game.current_player, self.game.other_player = self.game.other_player, self.game.current_player
         self.controller.after(1500, self.play_ai_turn) # Espera 1.5s
 
     def play_ai_turn(self):
-        """IA turn"""
-        ai_move, result = self.game.jelou() #Cambiar por el método de nosotros 
-        self.update_boards()
+        """IA turn, current_player = IA player"""
+        row, col = self.game.current_player.make_shot() #IA decide su disparo.
 
-        if self.game.is_game_over():
+        result = self.game.other_player.own_grid.receive_shot(row, col) #Dispara al player real (usuario)
+
+        #Se actualzia el resultado interno de la IA
+        self.update_ai_state(self.game.current_player, result, row, col)
+        self.update_boards() #se actualiza el board del juego.
+
+        coord = f"{chr(ord('A') + col)}{row + 1}" # Convertimos (r,c) a "A1"
+        self.status_label.config(text=f"The AI ​​shot in {coord}... ¡{result}! It's your turn")
+
+    #Termino el juego??
+        if self.game.other_player.has_lost():
+            self.game.winner = self.game.current_player
             self.end_game()
             return
-            
-        self.status_label.config(text=f"The AI ​​shot in {ai_move}... ¡{result}! It's your turn")
+        
+        #Si sigue el juego entonces...
+        self.game.current_player, self.game.other_player = self.game.other_player, self.game.current_player
         self.enable_opponent_grid()
+
+    def update_ai_state(self, ai_player, result, row, col):
+        """
+        Helper function to update the AI ​​status after a shot.
+        """
+        if isinstance(ai_player, ReflexAgentPlayer):
+            if result in ['HIT', 'SUNK']:
+                ai_player.last_hit = (row, col)
+                if result == 'SUNK':
+                    ai_player.last_hit = None # Se reinicia al hundir
+            else: # MISS
+                ai_player.last_hit = None
+        
+        if isinstance(ai_player, GoalBasedAgentPlayer):
+            if result in ['HIT', 'SUNK']:
+                ai_player.mode = 'TARGET'
+                if (row, col) not in ai_player.target_hits:
+                    ai_player.target_hits.append((row, col))
+                if result == 'SUNK':
+                    # Reiniciamos solo si el barco hundido contenía los objetivos
+                    sunk_boat_contains_targets = False
+                    for boat in self.game.other_player.own_grid.boats:
+                        if boat.is_sunk() and all(hit in boat.positions for hit in ai_player.target_hits):
+                            sunk_boat_contains_targets = True
+                            break
+                    if sunk_boat_contains_targets:
+                        ai_player.mode = 'HUNT'
+                        ai_player.target_hits = []
 
     def update_boards(self):
         """Redraw both boards according to the current game state."""
         # Tablero del jugador
         self.player1_canvas.delete("all")
         
-        p1_grid = self.player1.board  #depende de como accesamos al tablero
-        for r in range(10):
-            for c in range(10):
-                x1, y1 = c * CELL_SIZE, r * CELL_SIZE
-                x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
-                color = WATER_COLOR
-                cell = p1_grid[r][c]
-                if cell == 'S': # Casilla sin nada
-                    color = SHIP_COLOR
-                elif cell == 'H': # Hit
-                    color = HIT_COLOR
-                elif cell == 'M': # Miss
-                    color = MISS_COLOR
-                self.player1_canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
+        if self.player1 and hasattr(self.player1, 'own_grid'):
+            p1_grid = self.player1.own_grid.grid  #depende de como accesamos al tablero
+            for r in range(10):
+                for c in range(10):
+                    x1, y1 = c * CELL_SIZE, r * CELL_SIZE
+                    x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
+                    color = WATER_COLOR
+                    cell = p1_grid[r][c]
+                    if cell == 'S': # Casilla sin nada
+                        color = SHIP_COLOR
+                    elif cell == 'H': # Hit
+                        color = HIT_COLOR
+                    elif cell == 'M': # Miss
+                        color = MISS_COLOR
+                    self.player1_canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
 
-        # Tablero del oponente (se actualizan los botones)
-        
-        p2_tracking_grid = self.player1.tracking_board #Acceder la tablero de la IA
-        for r in range(10):
-            for c in range(10):
-                cell = p2_tracking_grid[r][c]
-                color = WATER_COLOR
-                if cell == 'H':
-                    color = HIT_COLOR
-                elif cell == 'M':
-                    color = MISS_COLOR
-                self.opponent_buttons[r][c].config(bg=color, activebackground=color)
+        # Tablero del oponente (se actualizan los botones)        
+        if self.player1 and hasattr(self.player1, 'opponent_grid'):
+            p2_tracking_grid = self.player1.opponent_grid.grid #Acceder la tablero de la IA
+            for r in range(10):
+                for c in range(10):
+                    cell = p2_tracking_grid[r][c]
+                    color = WATER_COLOR
+                    if cell == 'H':
+                        color = HIT_COLOR
+                    elif cell == 'M':
+                        color = MISS_COLOR
+                    self.opponent_buttons[r][c].config(bg=color, activebackground=color)
 
     def end_game(self):
         """Show the results"""
@@ -237,10 +349,10 @@ class GamePage(tk.Frame):
                 btn.config(state="disabled")
 
     def enable_opponent_grid(self):
-        p2_tracking_grid = self.player1.tracking_board #tablero con las casillas ya atacadas
+        p2_tracking_grid = self.player1.opponent_grid.grid #tablero con las casillas ya atacadas
         for r in range(10):
             for c in range(10):
-                if p2_tracking_grid[r][c] is None: # O el valor que uses para "no atacado"
+                if p2_tracking_grid[r][c] == '.': # O el valor que uses para "no atacado"
                     self.opponent_buttons[r][c].config(state="normal")
 
 class SimulationPage(tk.Frame):
