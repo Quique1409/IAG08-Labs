@@ -1,6 +1,6 @@
-"""
-Main witch GUI from Battleship Game.
-"""
+
+#Main program
+#GUI from Battleship Game.
 
 import tkinter as tk
 from tkinter import font as tkfont
@@ -20,7 +20,7 @@ from GoalBasedAgentPlayer import GoalBasedAgentPlayer
 CELL_SIZE = 35
 BOARD_WIDTH = BOARD_HEIGHT = 10 * CELL_SIZE
 PADDING = 10
-#Escoger colores de los fondos
+#All the used colors in the GUI in hexa format
 WINDOW_BG = "#98DA4C" 
 WATER_COLOR = "#ADD8E6"
 SHIP_COLOR = "#A9A9A9"
@@ -100,7 +100,7 @@ class MainMenu(tk.Frame):
                         command=self.quit)
         btn4.pack(pady=10)
         
-# ---CREDITS SECTION ---
+# Developers credit section
         credits_text = "Developed by:\nLeón Vargas Luis Guillermo\nMedrano Solano Enrique\nRamírez Valdovinos Eric\nRodríguez Zamora Joshua"
         credits_font = tkfont.Font(family=FONT_FAMILY, size=10, slant="italic")
 
@@ -119,10 +119,10 @@ class GamePage(tk.Frame):
         self.player2 = None #IA
         self.opponent_buttons = []
 
-        #Controles para la fase de colocación
+        #Controls for colocation phase
         self.placement_frame = tk.Frame(self, bg=WINDOW_BG)
         tk.Label(self.placement_frame, text="Orientation:", font=controller.label_font, bg=WINDOW_BG).pack(side="left", padx=5)
-        self.orientation_var = tk.StringVar(value='H') # Por defecto Horizontal
+        self.orientation_var = tk.StringVar(value='H') # Horizontal by default
         horiz_radio = tk.Radiobutton(self.placement_frame, text="Horizontal", variable=self.orientation_var, value='H', font=controller.label_font, bg=WINDOW_BG)
         horiz_radio.pack(side="left")
         vert_radio = tk.Radiobutton(self.placement_frame, text="Vertical", variable=self.orientation_var, value='V', font=controller.label_font, bg=WINDOW_BG)
@@ -137,19 +137,16 @@ class GamePage(tk.Frame):
         boards_frame = tk.Frame(self, bg=WINDOW_BG)
         boards_frame.pack(padx=20, pady=10)
         
-        # Player 1 (Your Board) Frame Setup with Coordinates
-        # ==========================================================
+        # Player 1 (Your Board)
         p1_coord_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
         p1_coord_frame.pack(side="left", padx=10)
 
-        tk.Label(p1_coord_frame, text="Your Board", font=controller.button_font, bg=WINDOW_BG).grid(row=0, column=1, columnspan=10, pady=5)
+        tk.Label(p1_coord_frame, text="Primary Ocean Grid", font=controller.button_font, bg=WINDOW_BG).grid(row=0, column=1, columnspan=10, pady=5)
 
-        # Column Headers (A, B, C...)
         for i in range(10):
             col_char = chr(ord('A') + i)
             tk.Label(p1_coord_frame, text=col_char, font=controller.label_font, bg=WINDOW_BG).grid(row=1, column=i + 1)
 
-        # Row Headers (1, 2, 3...)
         for i in range(10):
             row_num = str(i + 1)
             tk.Label(p1_coord_frame, text=row_num, font=controller.label_font, bg=WINDOW_BG, padx=5).grid(row=i + 2, column=0)
@@ -158,20 +155,16 @@ class GamePage(tk.Frame):
         self.player1_canvas.grid(row=2, column=1, rowspan=10, columnspan=10)
         self.player1_canvas.bind("<Button-1>", self.on_canvas_click)
 
-        # ==========================================================
-        # Opponent's Board Frame Setup with Coordinates
-        # ==========================================================
+        # Opponent's Board Frame Setup
         p2_coord_frame = tk.Frame(boards_frame, bg=WINDOW_BG)
         p2_coord_frame.pack(side="right", padx=10)
 
-        tk.Label(p2_coord_frame, text="Opponent's Board", font=controller.button_font, bg=WINDOW_BG).grid(row=0, column=1, columnspan=10, pady=5)
+        tk.Label(p2_coord_frame, text="Targeting grid", font=controller.button_font, bg=WINDOW_BG).grid(row=0, column=1, columnspan=10, pady=5)
 
-        # Column Headers (A, B, C...)
         for i in range(10):
             col_char = chr(ord('A') + i)
             tk.Label(p2_coord_frame, text=col_char, font=controller.label_font, bg=WINDOW_BG).grid(row=1, column=i + 1)
         
-        # Row Headers (1, 2, 3...) on the right side
         for i in range(10):
             row_num = str(i + 1)
             tk.Label(p2_coord_frame, text=row_num, font=controller.label_font, bg=WINDOW_BG, padx=5).grid(row=i + 2, column=11)
@@ -180,7 +173,7 @@ class GamePage(tk.Frame):
         self.player2_board.grid(row=2, column=1, rowspan=10, columnspan=10)
         self._create_opponent_grid() # This is now self-contained
 
-        # Botón para volver al menú
+        # Go back to menu button
         self.back_button = tk.Button(self, text="Menu", font=controller.button_font,
                                     command=self.go_to_main_menu)
         self.back_button.pack(pady=20)
@@ -194,11 +187,11 @@ class GamePage(tk.Frame):
         """The new game congiguration"""
         self.player1 = player1
         self.player2 = player2
-        self.game = Game(self.player1, self.player2) # La clase Game solo guarda el estado de los barcos
+        self.game = Game(self.player1, self.player2) #The class only saves the states of the boats
 
-        self.disable_opponent_grid() #se desabilita el board 
-        #empieza colocación
-        self.ships_to_place = list(self.player1.boat_fleet) #jugador
+        self.disable_opponent_grid() #Board is disabled
+        #Starts the boats' placements
+        self.ships_to_place = list(self.player1.boat_fleet) #Player
         self.player2.place_boats_randomly() #IA
         
         self.update_boards()
@@ -209,42 +202,41 @@ class GamePage(tk.Frame):
     def start_next_placement(self):
         """Prepares the next ship to be placed by the player."""
         if self.ships_to_place:
-            # Toma el siguiente barco de la lista
+            # Takes the next ship from the list
             current_ship = self.ships_to_place[0]
             self.status_label.config(text=f"Place your {current_ship.name}")
         else:
-            # Si no quedan barcos, termina la fase de colocación
+            # Ends the colocation phase if there's no more ships
             self.end_placement_phase()
 
     def on_canvas_click(self, event):
         """Handles the click on the player's board during the placement phase."""
-        # Si no estamos en fase de colocación, no hace nada
+        # Doesn't do anything if it isn't in colocation phase
         if not self.ships_to_place:
             return
 
-        # Convierte las coordenadas del clic (pixeles) a coordenadas de la cuadrícula (fila, columna)
+        # Transforms clics coordinates (pixels) to grid coordinates in the GUI
         col = event.x // CELL_SIZE
         row = event.y // CELL_SIZE
 
         current_ship = self.ships_to_place[0]
         orientation = self.orientation_var.get()
 
-        # Intenta colocar el barco usando el método de la clase Grid
+        # Tries to place the ship using the method in class Grid
         if self.player1.own_grid.place_boat(current_ship, row, col, orientation):
-            # Si se pudo colocar, lo elimina de la lista y pasa al siguiente
+            # If it places it, it will eliminate it from the list and goes to next
             self.ships_to_place.pop(0)
             self.update_boards()
             self.start_next_placement()
         else:
-            # Si no se pudo, muestra un aviso
             messagebox.showwarning("Invalid Position", "You cannot place the ship there. Try another position")
 
     def end_placement_phase(self):
         """Colocation phase finished"""
-        # Oculta los controles de colocación
+        # Hides colocation controls
         self.placement_frame.pack_forget()
 
-        # Vuelve a mostrar el botón de "Volver al Menú"
+        # Shows back to menu button
         self.back_button.pack(pady=20)
         
         self.status_label.config(text="Your fleet has been deployed! The battle begins.\n It's your turn!")
@@ -266,34 +258,34 @@ class GamePage(tk.Frame):
 
     def on_grid_click(self, row, col):
         """The mouse event from player real turn"""
-        self.disable_opponent_grid() #se evitan click accidenatales
-        result = self.game.other_player.own_grid.receive_shot(row, col) #registro del disparo (script Game)
+        self.disable_opponent_grid() #Avoids accidental clicks
+        result = self.game.other_player.own_grid.receive_shot(row, col) #shot register
 
-        #Se acrtualiza el board para el seguimiento del jugador
+        #Updates the board for player following
         if result in ['HIT', 'SUNK']:
             self.game.current_player.opponent_grid.grid[row][col] = "X"
         else:
             self.game.current_player.opponent_grid.grid[row][col] = "M"
 
-        self.update_boards() #Actualzia GUI
-        coord = f"{chr(ord('A') + col)}{row + 1}" # Convertimos (r,c) a "A1"
+        self.update_boards() #Updates GUI
+        coord = f"{chr(ord('A') + col)}{row + 1}" # Transforms (r,c) to "A1"
         self.status_label.config(text= f"You targetted {coord}... {result}!\n Opponent turn." )
 
-        #Termino el juego??
+        #Game finished??
         if self.game.other_player.has_lost():
             self.game.winner = self.game.current_player
             self.end_game()
             return
         
-        #Si sigue el juego entonces...
+        #If it continues then...
         self.game.current_player, self.game.other_player = self.game.other_player, self.game.current_player
-        self.controller.after(1500, self.play_ai_turn) # Espera 1.5s
+        self.controller.after(1500, self.play_ai_turn) # Waits 1.5s
 
     def play_ai_turn(self):
         """IA turn, current_player = IA player"""
-        row, col = self.game.current_player.make_shot() #IA decide su disparo.
+        row, col = self.game.current_player.make_shot() #IA decides their shot.
 
-        result = self.game.other_player.own_grid.receive_shot(row, col) #Dispara al player real (usuario)
+        result = self.game.other_player.own_grid.receive_shot(row, col) #Shot the player
 
          # Update the AI's own tracking grid so it doesn't shoot here again.
         if result in ['HIT', 'SUNK']:
@@ -302,20 +294,20 @@ class GamePage(tk.Frame):
             self.game.current_player.opponent_grid.grid[row][col] = "M"
    
 
-        #Se actualzia el resultado interno de la IA
+        #AI's internal result gets updated
         self.update_ai_state(self.game.current_player, result, row, col)
-        self.update_boards() #se actualiza el board del juego.
+        self.update_boards()
 
-        coord = f"{chr(ord('A') + col)}{row + 1}" # Convertimos (r,c) a "A1"
+        coord = f"{chr(ord('A') + col)}{row + 1}" # Transforms (r,c) to "A1"
         self.status_label.config(text=f"The opponent fired at {coord}... ¡{result}!\n It's your turn")
 
-    #Termino el juego??
+        #Game finished??
         if self.game.other_player.has_lost():
             self.game.winner = self.game.current_player
             self.end_game()
             return
         
-        #Si sigue el juego entonces...
+        #If it continues then...
         self.game.current_player, self.game.other_player = self.game.other_player, self.game.current_player
         self.enable_opponent_grid()
 
@@ -327,7 +319,7 @@ class GamePage(tk.Frame):
             if result in ['HIT', 'SUNK']:
                 ai_player.last_hit = (row, col)
                 if result == 'SUNK':
-                    ai_player.last_hit = None # Se reinicia al hundir
+                    ai_player.last_hit = None # Resets when boat get sunk
             else: # MISS
                 ai_player.last_hit = None
         
@@ -337,7 +329,7 @@ class GamePage(tk.Frame):
                 if (row, col) not in ai_player.target_hits:
                     ai_player.target_hits.append((row, col))
                 if result == 'SUNK':
-                    # Reiniciamos solo si el barco hundido contenía los objetivos
+                    # Resets only if sunk boat had the targets
                     sunk_boat_contains_targets = False
                     for boat in self.game.other_player.own_grid.boats:
                         if boat.is_sunk() and all(hit in boat.positions for hit in ai_player.target_hits):
@@ -348,19 +340,19 @@ class GamePage(tk.Frame):
                         ai_player.target_hits = []
 
     def update_boards(self):
-        """Redraw both boards according to the current game state."""
-        # Tablero del jugador
+        #Redraw both boards according to the current game state.
+        # Player board
         self.player1_canvas.delete("all")
         
         if self.player1 and hasattr(self.player1, 'own_grid'):
-            p1_grid = self.player1.own_grid.grid  #depende de como accesamos al tablero
+            p1_grid = self.player1.own_grid.grid  
             for r in range(10):
                 for c in range(10):
                     x1, y1 = c * CELL_SIZE, r * CELL_SIZE
                     x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
                     color = WATER_COLOR
                     cell = p1_grid[r][c]
-                    if cell == 'O': # Casilla sin nada
+                    if cell == 'O': # Cell with boat part
                         color = SHIP_COLOR
                     elif cell == 'X': # Hit
                         color = HIT_COLOR
@@ -368,9 +360,9 @@ class GamePage(tk.Frame):
                         color = MISS_COLOR
                     self.player1_canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
 
-        # Tablero del oponente (se actualizan los botones)        
+        # Opponent's board      
         if self.player1 and hasattr(self.player1, 'opponent_grid'):
-            p2_tracking_grid = self.player1.opponent_grid.grid #Acceder la tablero de la IA
+            p2_tracking_grid = self.player1.opponent_grid.grid 
             for r in range(10):
                 for c in range(10):
                     cell = p2_tracking_grid[r][c]
@@ -394,10 +386,10 @@ class GamePage(tk.Frame):
                 btn.config(state="disabled")
 
     def enable_opponent_grid(self):
-        p2_tracking_grid = self.player1.opponent_grid.grid #tablero con las casillas ya atacadas
+        p2_tracking_grid = self.player1.opponent_grid.grid 
         for r in range(10):
             for c in range(10):
-                if p2_tracking_grid[r][c] == '.': # O el valor que uses para "no atacado"
+                if p2_tracking_grid[r][c] == '.': 
                     self.opponent_buttons[r][c].config(state="normal")
 
 class SimulationPage(tk.Frame):
@@ -414,7 +406,7 @@ class SimulationPage(tk.Frame):
         tk.Label(input_frame, text="Count:", font=controller.label_font, bg=WINDOW_BG).pack(side="left", padx=5)
         self.num_games_entry = tk.Entry(input_frame, font=controller.label_font, width=10)
         self.num_games_entry.pack(side="left")
-        self.num_games_entry.insert(0, "100") # Valor por defecto
+        self.num_games_entry.insert(0, "100") # Default value
 
         self.run_button = tk.Button(self, text="Run Simulation", font=controller.button_font, command=self.run_simulation_thread)
         self.run_button.pack(pady=20)
@@ -442,7 +434,7 @@ class SimulationPage(tk.Frame):
         self.result_text.insert(tk.END, f"Ejecutando {num_games} simulaciones...\n")
         self.result_text.config(state="disabled")
 
-        # El hilo permite que la simulación se ejecute en segundo plano
+        # Thread for background 
         thread = Thread(target=self.execute_simulation, args=(num_games,))
         thread.start()
 
@@ -461,15 +453,15 @@ class SimulationPage(tk.Frame):
             if winner:
                 stats[winner.name] += 1
             
-            # Actualiza la GUI de forma segura desde el hilo
-            if (i + 1) % 10 == 0 or i == num_games - 1: #a las 10 se reinicia
+            # GUI updates from thread
+            if (i + 1) % 10 == 0 or i == num_games - 1: 
                 progress_msg = f"Game {i+1}/{num_games} finished\n"
                 self.controller.after(0, self.update_results, progress_msg)
 
         end_time = time.time()
         total_time = end_time - start_time
         
-        #Muestra de resultados finales
+        #Shows final results
         final_results = "\n--- Simulation finished ---\n"
         final_results += f"Time: {total_time:.2f} seconds\n"
         
