@@ -38,7 +38,7 @@ class Mesh:
                     return False
         return True
 
-    def place_boat(self, boat, row, col, orientation):
+    def intro_boat(self, boat, row, col, orientation):
         """Places a boat on the grid."""
         if not self.verify_placement(boat, row, col, orientation):
             return False

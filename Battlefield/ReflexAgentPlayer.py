@@ -26,7 +26,7 @@ class ReflexAgentPlayer(IAPlayer):
 
         # If we don't have a last hit or no valid neighbors, shoot randomly
         while True:
-            column = random.randint(0, self.opponent_grid.size - 1)
+            column = random.randint(0, self.opponent_grid.size - 1) #if still didnt shoot, shoot randomly
             row = random.randint(0, self.opponent_grid.size - 1)
             if self.opponent_grid.grid[column][row] == '.':
                 return column, row

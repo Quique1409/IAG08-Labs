@@ -10,35 +10,35 @@ class HumanPlayer(Player):
                 print(f"Put your {boat.name} (Size: {boat.size})")
                 try:
                     prompt = f"Start coordinate (ej. A5) y orientation (H/V), example: A5 H: "
-                    placement = input(prompt).strip().upper().split()
+                    placement = input(prompt).strip().upper().split() # Split input into coordinate and orientation
                     coord_str, orientation = placement[0], placement[1]
 
-                    col = ord(coord_str[0]) - ord('A')
-                    row = int(coord_str[1:]) - 1
+                    col = ord(coord_str[0]) - ord('A') # Convert letter to number (A=0, B=1, ...)
+                    row = int(coord_str[1:]) - 1 # Convert number to 0-indexed
 
-                    if orientation not in ['H', 'V']:
-                        raise ValueError("Orientación inválida.")
-                    if not (0 <= row < self.own_grid.size and 0 <= col < self.own_grid.size):
-                         raise ValueError("Coordenadas fuera del tablero.")
+                    if orientation not in ['H', 'V']: #make sure orientation is valid
+                        raise ValueError("Invalid orientation. Use 'H' for horizontal or 'V' for vertical.")
+                    if not (0 <= row < self.own_grid.size and 0 <= col < self.own_grid.size): #check for the number is in the range 0-9
+                         raise ValueError("Coordinates out of bounds.")
 
-                    if self.own_grid.place_boat(boat, row, col, orientation):
+                    if self.own_grid.intro_boat(boat, row, col, orientation): #If sintaxis introduced is correct, try to place the boat
                         placed = True
-                    else:
-                        print("No se puede colocar el barco ahí. Ya está ocupado o fuera del tablero.")
+                    else: # If placement failed, intro_boat() returns False
+                        print("This coordinates are already occupied or out of bounds. Try again.")
                 except (ValueError, IndexError):
-                    print("Formato de entrada inválido. Por favor, usa el formato 'A5 H'.")
+                    print("Invalid input format. Please use the format 'A8 H'.") #The boat in the loop didnt get placed, so we try again
 
     def make_shot(self):
         while True:
             try:
-                coord_str = input(f"{self.name}, ingresa la coordenada para tu disparo (ej. B7): ").strip().upper()
+                coord_str = input(f"{self.name}, input the coordinate for you shot (ej. B7): ").strip().upper() #We get the coordinate from the user
                 col = ord(coord_str[0]) - ord('A')
                 row = int(coord_str[1:]) - 1
-                if not (0 <= row < self.opponent_grid.size and 0 <= col < self.opponent_grid_view.size):
-                    raise ValueError("Coordenadas fuera del tablero.")
+                if not (0 <= row < self.opponent_grid.size and 0 <= col < self.opponent_grid.size):
+                    raise ValueError("Coordinates out of bounds.")
                 if self.opponent_grid.grid[row][col] != '.':
-                    print("Ya has disparado a esa coordenada. Intenta de nuevo.")
+                    print("You have already shot at this coordinate. Try again.")
                     continue
                 return row, col
             except (ValueError, IndexError):
-                print("Coordenada inválida. Por favor, usa el formato 'B7'.")
+                print("Invalid coordinate. Please use the format 'B7'.")
