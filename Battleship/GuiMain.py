@@ -301,7 +301,11 @@ class GamePage(tk.Frame):
         coord = f"{chr(ord('A') + col)}{row + 1}" # Transforms (r,c) to "A1"
         self.status_label.config(text=f"The opponent fired at {coord}... ¡{result}!\n It's your turn")
 
+<<<<<<< HEAD:Battleship/GuiMain.py
         #Game finished??
+=======
+        #Termino el juego??
+>>>>>>> quique:Battlefield/GuiMain.py
         if self.game.other_player.has_lost():
             self.game.winner = self.game.current_player
             self.end_game()
