@@ -1,6 +1,6 @@
 lineas_with_data = {
-    "linea1": {
-        "Observatorio": {"neighbors": [("Tacubaya", 1262)]},
+    "linea1": {# key in the dictionary is the line name
+        "Observatorio": {"neighbors": [("Tacubaya", 1262)]},#the key of every station is the station name and the value is a dictionary with its neighbors and intersections
         "Tacubaya": {"neighbors": [("Observatorio", 1262), ("Juanacatlán", 1158), ("Patriotismo", 1133)], "intersections": ["linea7", "linea9"]},
         "Juanacatlán": {"neighbors": [("Tacubaya", 1158), ("Chapultepec", 973)]},
         "Chapultepec": {"neighbors": [("Juanacatlán", 973), ("Sevilla", 501)]},
