@@ -265,7 +265,7 @@ class GamePage(tk.Frame):
         coord = f"{chr(ord('A') + col)}{row + 1}" # Convertimos (r,c) a "A1"
         self.status_label.config(text=f"The AI ​​shot in {coord}... ¡{result}! It's your turn")
 
-    #Termino el juego??
+        #Termino el juego??
         if self.game.other_player.has_lost():
             self.game.winner = self.game.current_player
             self.end_game()
@@ -318,7 +318,7 @@ class GamePage(tk.Frame):
                     cell = p1_grid[r][c]
                     if cell == 'S': # Casilla sin nada
                         color = SHIP_COLOR
-                    elif cell == 'H': # Hit
+                    elif cell == 'X': # Hit
                         color = HIT_COLOR
                     elif cell == 'M': # Miss
                         color = MISS_COLOR
