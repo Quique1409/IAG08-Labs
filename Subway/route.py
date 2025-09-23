@@ -1,4 +1,5 @@
 import metro
+import heapq #Cola de prioridad
 #creación de la clase Nodo
 class Nodo():
     def __init__(self, nombre):
@@ -9,10 +10,10 @@ class Nodo():
         self.padre = None
         self.f = -1        
 
-    def AgregarVecinos(self, vecino):
+    def AgregarVecinos(self, vecino, distancia):
         #verifica si no hay un vecino ya con ese nombre en algún vertice 
         if vecino != self.nombre and vecino not in self.vecinos: 
-            self.vecinos.append(vecino) #Añadimos los vecinos a la lista de vecinos
+            self.vecinos.append((vecino, distancia)) #Añadimos la tupla con los vecinos y la distancia
 
 
 #Creación de clase grafo
@@ -24,11 +25,11 @@ class Grafo():
 
     def AgregarVertice(self, nombreNodo):
         if nombreNodo in self.vertices: #Si el nombre ya esta ocupado dentro del diccionario
-            print(f"Ya existe el vecino pedido: {nombreNodo}") #Advertimos de su existencia y seguimos
+            print(f"Ya existe el vecino pedido: {nombreNodo}") #Advertimos de su existencia y seguimos (Creo que esto ya no es necesario)
         else:
             self.vertices[nombreNodo] = Nodo(nombreNodo) #De lo contrario creamos un nuevo nodo con el nombre dado
 
-    def AgregarArista(self, nombreNodo1, nombreNodo2):
+    def AgregarArista(self, nombreNodo1, nombreNodo2, distancia): 
         if nombreNodo1 not in self.vertices: #Si el nombre 1 no es un vertice existente se advierte y seguimos
             print(f"El vertice {nombreNodo1} no esta definido")
         elif nombreNodo2 not in self.vertices: #Si el nombre 2 no es un vertice existente se advierte y seguimos
@@ -36,15 +37,81 @@ class Grafo():
         else: 
             #De lo contrario
             #Añadimos una arista entre el nodo1 y el nodo2 entre sí, añade cada uno a la lista de vecino del otro
-            self.vertices[nombreNodo1].AgregarVecinos(self.vertices[nombreNodo2]) 
-            self.vertices[nombreNodo2].AgregarVecinos(self.vertices[nombreNodo1])
+            self.vertices[nombreNodo1].AgregarVecinos(self.vertices[nombreNodo2], distancia) 
+            self.vertices[nombreNodo2].AgregarVecinos(self.vertices[nombreNodo1], distancia)
 
     def Imprimir(self):
-        for nodo in self.vertices.keys(): #Se recorre cada nodo en el diccionario de vertices
-            cadena = nodo + " -> [" #Se imprime el nodo y empezamos un modo de impresión como arreglo
-            for vecino in self.vertices[nodo].vecinos: #recorreremos cada vecino que tenga la lista de vecinos
-                cadena += vecino.nombre + ", " #añadira cada vecino contenido en la lista de sus vecinos correspondientes en la cadena seguido de una coma
-            print(cadena + "]") #Imprime la lista entera y al final cerramos el "arreglo"
+        """Se recorrer el nodo en el diccionario de vertices, de igual forma se añade cada vecino en la tupla contenida para mostrar al usuario el camino"""
+        for nodo_nombre in self.vertices[nodo_nombre]:
+            nodo = self.vertices[nodo_nombre]
+            cadena = nodo.nombre + "-> ["
+            for vecino, distancia in nodo.vecinos:
+                cadena += f"{vecino.nombre}({distancia}m), "
+            print(cadena.strip(", ")+"]")
+
+
+    def A_star(self, NodoInicial, NodoFinal):
+        """
+        Heurística (h) es la estimación del costo desde un nodo hasta el final, en este caso se usa una h=0
+        """
+        self.padres.clear()
+        def heuristica(n1, n2):
+            return 0
+        
+        nodos_visitados = set()
+
+        g_score = {nombre: float('inf') for nombre in self.vertices}
+        g_score[NodoInicial] = 0
+
+
+        f_score = {nombre: float('inf') for nombre in self.vertices}
+        f_score[NodoInicial] = heuristica(self.vertices[NodoInicial], self.vertices[NodoFinal])
+
+        prioridad = [(f_score[NodoInicial], NodoInicial)]
+
+        while prioridad:
+            _, nodo_actual = heapq.heappop(prioridad)
+            if nodo_actual == NodoFinal:
+                camino = []
+                distancia_Total = g_score[NodoFinal]
+                temp = NodoFinal
+                while temp in self.padres:
+                    camino.append(temp)
+                    temp = self.padres[temp]
+                camino.append(NodoInicial)
+                camino.reverse()
+                return camino, distancia_Total
+            
+
+        nodos_visitados.add(nodo_actual)
+        nodo_actual = self.vertices[nodo_actual]
+
+        for nodo_vecino, distancia in nodo_actual.vecinos:
+            vecino_nombre = nodo_vecino.nombre
+            if vecino_nombre in nodos_visitados:
+                continue
+
+            g_score_final = g_score[nodo_actual] + distancia
+
+            if g_score_final < g_score[vecino_nombre]:
+                self. padres[vecino_nombre] = nodo_actual
+                g_score[vecino_nombre] = g_score_final
+                f_score[vecino_nombre] = g_score_final + heuristica(nodo_vecino, self.vertices[NodoFinal])
+
+                if (f_score[vecino_nombre], vecino_nombre) not in prioridad:
+                    heapq.heappush(prioridad, (f_score[vecino_nombre], vecino_nombre))
+
+        return None, float('inf')
+    
+    def EncontrarRutaAStar(self, NodoInicial, NodoFinal):
+        print(f"\n\033[105m*\033[0mResultado del A* (Ruta más corta en distancia):")
+        camino, distancia = self.A_star(NodoInicial, NodoFinal)
+        if camino:
+            print(f"Distancia total: {distancia / 1000:.2f} km")
+            print(f"No. de estaciones: {len(camino)}")
+            print(" -> ".join(camino))
+        else:
+            print(f"No se encontró una ruta de {NodoInicial} a {NodoFinal}")
 
     #Implementación del Breadth First Search
     def BFS(self, nombreNodo1):
