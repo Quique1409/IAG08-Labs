@@ -1,132 +1,117 @@
 import lines 
-import heapq #Cola de prioridad
-#creación de la clase Nodo
+import heapq #Priority queue
+
+
 class Nodo():
-    def __init__(self, nombre):
-        self.nombre = nombre #es la forma de nombrar al nodo
-        self.vecinos = [] #Lista para que se almacenen los vecinos de cada nodo
-        self.color = "blanco"
+    def __init__(self, name):
+        self.name = name 
+        self.neighbors = [] 
         self.dist = -1
-        self.padre = None
+        self.father = None
         self.f = -1        
 
-    def AgregarVecinos(self, vecino, distancia):
-        #verifica si no hay un vecino ya con ese nombre en algún vertice 
-        if vecino != self.nombre and vecino not in self.vecinos: 
-            self.vecinos.append((vecino, distancia)) #Añadimos la tupla con los vecinos y la distancia
+    def Addneighbors(self, neighbor, distance):
+        if neighbor != self.name and neighbor not in self.neighbors: 
+            self.neighbors.append((neighbor, distance)) 
 
 
 
-class Grafo:
+class Graph:
     def __init__(self):
         self.vertices = {}
-        self.padres = {}
+        self.fathers = {}
 
-    def AgregarVertice(self, nombre_estacion, datos_estacion):
-        self.vertices[nombre_estacion] = datos_estacion
+    def AddVertice(self, name_station, datos_station):
+        self.vertices[name_station] = datos_station
 
-    def A_star(self, NodoInicial, NodoFinal):
-        def heuristica(n1, n2):
-            return 0  # Heurística simple, ya que no se tienen coordenadas
+    def Dijkstra(self, InitialNode, FinalNode):
 
-        self.padres.clear()
+        self.fathers.clear()
         
-        g_score = {nombre: float('inf') for nombre in self.vertices}
-        g_score[NodoInicial] = 0
+        g_score = {name: float('inf') for name in self.vertices}
+        g_score[InitialNode] = 0
 
-        f_score = {nombre: float('inf') for nombre in self.vertices}
-        f_score[NodoInicial] = heuristica(NodoInicial, NodoFinal)
 
-        prioridad = [(f_score[NodoInicial], NodoInicial)]
+        priority = [(g_score[InitialNode], InitialNode)]
 
-        while prioridad:
-            f_actual, nodo_actual_nombre = heapq.heappop(prioridad)
+        while priority:
+            _, current_node_name = heapq.heappop(priority)
 
-            if nodo_actual_nombre == NodoFinal:
-                camino = []
-                distancia_Total = g_score[NodoFinal]
-                temp = NodoFinal
-                while temp in self.padres:
-                    camino.append(temp)
-                    temp = self.padres[temp]
-                camino.append(NodoInicial)
-                camino.reverse()
-                return camino, distancia_Total
+            if current_node_name == FinalNode:
+                path = []
+                distance_Total = g_score[FinalNode]
+                temp = FinalNode
+                while temp in self.fathers:
+                    path.append(temp)
+                    temp = self.fathers[temp]
+                path.append(InitialNode)
+                path.reverse()
+                return path, distance_Total
 
-            for vecino_nombre, distancia in self.vertices[nodo_actual_nombre]["neighbors"]:
-                g_score_final = g_score[nodo_actual_nombre] + distancia
+            for neighbor_name, distance in self.vertices[current_node_name]["neighbors"]:
+                g_score_final = g_score[current_node_name] + distance
                 
-                if g_score_final < g_score.get(vecino_nombre, float('inf')):
-                    self.padres[vecino_nombre] = nodo_actual_nombre
-                    g_score[vecino_nombre] = g_score_final
-                    f_score[vecino_nombre] = g_score_final + heuristica(vecino_nombre, NodoFinal)
-                    heapq.heappush(prioridad, (f_score[vecino_nombre], vecino_nombre))
+                if g_score_final < g_score.get(neighbor_name, float('inf')):
+                    self.fathers[neighbor_name] = current_node_name
+                    g_score[neighbor_name] = g_score_final
+                    heapq.heappush(priority, (g_score[neighbor_name], neighbor_name))
         
         return None, float('inf')
     
-    def EncontrarRutaAStar(self, NodoInicial, NodoFinal):
-        print(f"\n\033[105m*\033[0mResultado del A* (Ruta más corta en distancia):")
-        if NodoInicial not in self.vertices or NodoFinal not in self.vertices:
-            print(f"Una o ambas estaciones no se encontraron en la red del metro.")
+    def FindPathDijkstra(self, InitialNode, FinalNode):
+        print(f"\n\033[105m*\033[0mResults using Dijkstra (Shortest path in distance):")
+        if InitialNode not in self.vertices or FinalNode not in self.vertices:
+            print(f"One or more subway stations weren't found.")
             return
 
-        camino, distancia = self.A_star(NodoInicial, NodoFinal)
-        if camino:
-            print(f"Distancia total: {distancia / 1000:.2f} km")
-            print(f"No. de estaciones: {len(camino)}")
-            print(" -> ".join(camino))
+        path, distance = self.Dijkstra(InitialNode, FinalNode)
+        if path:
+            print(f"total distance: {distance / 1000:.2f} km")
+            print(f"Number of stations: {len(path)}")
+            print(" -> ".join(path))
         else:
-            print(f"No se encontró una ruta de {NodoInicial} a {NodoFinal}")
+            print(f"No path found from {InitialNode} to {FinalNode}")
 
-
-# -------------------------------------------------------------
-# Nueva y correcta construcción del grafo
-# -------------------------------------------------------------
-grafo = Grafo()
+def main():
+    STC_Metro = Graph()
   
-# Añadir todos los vértices al grafo
-for line_data in lines.lineas_with_data.values():
-    for station_name, station_info in line_data.items():
-        if station_name not in grafo.vertices:
-            grafo.AgregarVertice(station_name, station_info)
+    for line_data in lines.lineas_with_data.values():
+        for station_name, station_info in line_data.items():
+            if station_name not in STC_Metro.vertices:
+                STC_Metro.AddVertice(station_name, station_info)
 
+    for line_data in lines.lineas_with_data.values():
+        for station_name, station_info in line_data.items():
+            neighbors_actuales = STC_Metro.vertices[station_name]["neighbors"]
+            for neighbor, distance in station_info["neighbors"]:
+                if (neighbor, distance) not in neighbors_actuales:
+                    neighbors_actuales.append((neighbor, distance))
 
-# 2. Después, poblamos la lista de vecinos para cada estación
-for line_data in lines.lineas_with_data.values():
-    for station_name, station_info in line_data.items():
-        # Obtenemos la lista de vecinos actuales del grafo
-        vecinos_actuales = grafo.vertices[station_name]["neighbors"]
-        # Agregamos los nuevos vecinos solo si no están ya en la lista
-        for vecino, distancia in station_info["neighbors"]:
-            if (vecino, distancia) not in vecinos_actuales:
-                vecinos_actuales.append((vecino, distancia))
+    #Route 1
+    InitialState1 = "Pantitlán"
+    FinalStation1 = "Barranca del Muerto"
 
-# Las aristas se añaden automáticamente a través de la estructura 'neighbors'
-# en el diccionario 'lineas_with_data', por lo que no es necesario un bucle de aristas separado.
+    #Route 2
+    InitialState2 = "Tacubaya"
+    FinalStation2 = "Pantitlán"
 
-#Ruta 1
-estacionInicial1 = "San Joaquín"
-estacionFinal1 = "Universidad"
+    #Route 3
+    InitialState3 = "Pantitlán"
+    FinalStation3 = "Tacubaya"
 
-#Ruta 2
-estacionInicial2 = "Tacubaya"
-estacionFinal2 = "Pantitlán"
+    #First path
+    print(f"\n\033[0m\033[104m* Path:\033[0m {InitialState1.upper()} to {FinalStation1.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState1, FinalStation1)
+    print("\nHappy travels\n-----------------------")
 
-#Ruta 3
-estacionInicial3 = "Pantitlán"
-estacionFinal3 = "Tacubaya"
+    #Second Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState2.upper()} to {FinalStation2.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState2, FinalStation2)
+    print("\nHappy travels!\n-----------------------")
 
-#Encontramos los caminos en la ruta 1 con A*
-print(f"\n\033[0m\033[104m* Ruta de:\033[0m {estacionInicial1.upper()} a {estacionFinal1.upper()}")
-grafo.EncontrarRutaAStar(estacionInicial1, estacionFinal1)
-print("\nFeliz viaje!\n-----------------------")
+    #Third Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState3.upper()} to {FinalStation3.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState3, FinalStation3)
+    print("\nHappy travels!\n-----------------------")
 
-#Encontramos los caminos en la ruta 2 con A*
-print(f"\n\n\033[0m\033[104m* Ruta de:\033[0m {estacionInicial2.upper()} a {estacionFinal2.upper()}")
-grafo.EncontrarRutaAStar(estacionInicial2, estacionFinal2)
-print("\nFeliz viaje!\n-----------------------")
-
-#Encontramos los caminos en la ruta 3 con A*
-print(f"\n\n\033[0m\033[104m* Ruta de:\033[0m {estacionInicial3.upper()} a {estacionFinal3.upper()}")
-grafo.EncontrarRutaAStar(estacionInicial3, estacionFinal3)
-print("\nFeliz viaje!\n-----------------------")
+main()
