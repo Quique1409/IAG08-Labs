@@ -97,6 +97,34 @@ def main():
     #Route 3
     InitialState3 = "Pantitlán"
     FinalStation3 = "Tacubaya"
+    
+    #Route 4
+    InitialState4 = "Universidad"
+    FinalStation4 = "Canal del Norte"
+
+    #Route 5
+    InitialState5 = "Ciudad Azteca"
+    FinalStation5 = "Mixcoac"
+
+    #Route 6
+    InitialState6 = "Observatorio"
+    FinalStation6 = "La Paz"
+
+    #Route 7
+    InitialState7 = "Politécnico"
+    FinalStation7 = "Mexicaltzingo"
+
+    #Route 8
+    InitialState8 = "Santa Anita"
+    FinalStation8 = "Tacuba"
+
+    #Route 9
+    InitialState9 = "Constitución de 1917"
+    FinalStation9 = "El Rosario"
+
+    #Route 10
+    InitialState10 = "Zapata"
+    FinalStation10 = "Pantitlán"
 
     #First path
     print(f"\n\033[0m\033[104m* Path:\033[0m {InitialState1.upper()} to {FinalStation1.upper()}")
@@ -113,4 +141,39 @@ def main():
     STC_Metro.FindPathDijkstra(InitialState3, FinalStation3)
     print("\nHappy travels!\n-----------------------")
 
+#Fourth Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState4.upper()} to {FinalStation4.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState4, FinalStation4)
+    print("\nHappy travels!\n-----------------------")
+
+    #Fifth Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState5.upper()} to {FinalStation5.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState5, FinalStation5)
+    print("\nHappy travels!\n-----------------------")
+
+    #Sixth Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState6.upper()} to {FinalStation6.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState6, FinalStation6)
+    print("\nHappy travels!\n-----------------------")
+
+    #Seventh Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState7.upper()} to {FinalStation7.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState7, FinalStation7)
+    print("\nHappy travels!\n-----------------------")
+
+    #Eighth Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState8.upper()} to {FinalStation8.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState8, FinalStation8)
+    print("\nHappy travels!\n-----------------------")
+
+    #Ninth Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState9.upper()} to {FinalStation9.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState9, FinalStation9)
+    print("\nHappy travels!\n-----------------------")
+
+    #Tenth Path
+    print(f"\n\n\033[0m\033[104m* Path:\033[0m {InitialState10.upper()} to {FinalStation10.upper()}")
+    STC_Metro.FindPathDijkstra(InitialState10, FinalStation10)
+    print("\nHappy travels!\n-----------------------")
+    
 main()
