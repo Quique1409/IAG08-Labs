@@ -192,7 +192,7 @@ lineas_with_data = {
         "Morelos": {"neighbors": [("San Lázaro", 1296), ("Tepito", 498), ("Canal del Norte", 910), ("Candelaria", 884)], "intersections": ["linea4"]},
         "Tepito": {"neighbors": [("Morelos", 498), ("Lagunilla", 611)]},
         "Lagunilla": {"neighbors": [("Tepito", 611), ("Garibaldi / Lagunilla", 474)]},
-        "Garibaldi / Lagunilla": {"neighbors": [("Lagunilla", 474), ("Guerrero", 757), ("Bellas Artes", 634), ("San Juan de Letrán", 456)], "intersections": ["linea8"]},
+        "Garibaldi / Lagunilla": {"neighbors": [("Lagunilla", 474), ("Guerrero", 757), ("Bellas Artes", 634)], "intersections": ["linea8"]},
         "Guerrero": {"neighbors": [("Garibaldi / Lagunilla", 757), ("Buenavista", 521), ("Tlatelolco", 1042), ("Hidalgo", 702)], "intersections": ["linea3"]},
         "Buenavista": {"neighbors": [("Guerrero", 521)]},
     },

@@ -34,7 +34,8 @@ class Graph: #represent the subway network
         while priority: #main loop, continues until all nodes are explored or the destination is reached
             # Get the node with the lowest g_score
             #This loop continues until all nodes are explored or the destination is reached
-            _, current_node_name = heapq.heappop(priority) #get node with lowest g_score, _ its because we are not going to use the distance value just for know wich extract
+            _, current_node_name = heapq.heappop(priority) #get node with lowest g_score, 
+            #_ its because we are not going to use the distance value just for know wich extract
 
             if current_node_name == FinalNode: #if we reached the destination
                 path = [] #to store the path
