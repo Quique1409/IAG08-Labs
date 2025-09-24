@@ -8,7 +8,6 @@ class Nodo(): #represent a single station
         self.neighbors = [] #list of neighboring stations
         self.dist = -1 #distance from the initial station
         self.father = None #previous station in the shortest path
-        self.f = -1 #estimated total cost (g + h)
 
     def Addneighbors(self, neighbor, distance): 
         if neighbor != self.name and neighbor not in self.neighbors: #avoid adding itself as neighbor and duplicates
