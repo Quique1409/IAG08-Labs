@@ -115,16 +115,16 @@ for line_data in lines.lineas_with_data.values():
                 vecinos_actuales.append((vecino, distancia))
 
 #Ruta 1
-estacionInicial1 = "San Antonio"
-estacionFinal1 = "Aragón"
+estacionInicial1 = "San Joaquín"
+estacionFinal1 = "Universidad"
 
 #Ruta 2
-estacionInicial2 = "San Joaquín"
-estacionFinal2 = "Universidad"
+estacionInicial2 = "Tacubaya"
+estacionFinal2 = "Pantitlán"
 
 #Ruta 3
-estacionInicial3 = "Vallejo"
-estacionFinal3 = "Insurgentes"
+estacionInicial3 = "Pantitlán"
+estacionFinal3 = "Tacubaya"
 
 #Encontramos los caminos en la ruta 1 con A*
 print(f"\n\033[0m\033[104m* Ruta de:\033[0m {estacionInicial1.upper()} a {estacionFinal1.upper()}")
