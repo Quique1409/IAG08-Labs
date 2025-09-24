@@ -90,6 +90,17 @@ for line_data in lines.lineas_with_data.values():
         if station_name not in grafo.vertices:
             grafo.AgregarVertice(station_name, station_info)
 
+
+# 2. Después, poblamos la lista de vecinos para cada estación
+for line_data in lines.lineas_with_data.values():
+    for station_name, station_info in line_data.items():
+        # Obtenemos la lista de vecinos actuales del grafo
+        vecinos_actuales = grafo.vertices[station_name]["neighbors"]
+        # Agregamos los nuevos vecinos solo si no están ya en la lista
+        for vecino, distancia in station_info["neighbors"]:
+            if (vecino, distancia) not in vecinos_actuales:
+                vecinos_actuales.append((vecino, distancia))
+
 # Las aristas se añaden automáticamente a través de la estructura 'neighbors'
 # en el diccionario 'lineas_with_data', por lo que no es necesario un bucle de aristas separado.
 
@@ -100,12 +111,12 @@ estacionInicial1 = "San Antonio"
 estacionFinal1 = "Aragón"
 
 #Ruta 2
-estacionInicial2 = "Aquiles Serdán"
-estacionFinal2 = "Iztapalapa"
+estacionInicial2 = "San Joaquín"
+estacionFinal2 = "Universidad"
 
 #Ruta 3
-estacionInicial3 = "Vallejo"
-estacionFinal3 = "Insurgentes"
+estacionInicial3 = "Universidad"
+estacionFinal3 = "San Joaquín"
 
 #Encontramos los caminos en la ruta 1 con A*
 print(f"\n\033[0m\033[104m* Ruta de:\033[0m {estacionInicial1.upper()} a {estacionFinal1.upper()}")
