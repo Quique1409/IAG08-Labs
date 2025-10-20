@@ -8,6 +8,7 @@ from random import seed
 from termcolor import colored
 from random import choice
 from itertools import product
+import copy
 
 class ProblemState:
     """
@@ -417,7 +418,7 @@ class RubikPuzzle(ProblemState):
         return reduce(lambda x,y:x|y,[(7<<code[letter][0])\
         for letter in pattern])
     
-    def Getparent(self):
+    def GetParent(self):
         return self.parent
     
     def GetDepth(self):
@@ -501,45 +502,46 @@ class PatternBasedHeuristic:
 #---------------------Main----------------------
 
 if __name__ == "__main__":
-    import time
 
-    # Crear el cubo inicial (resuelto)
-    initial_cube = RubikPuzzle()
-    print("Cubo resuelto inicial:")
-    print(initial_cube)
+    # Create the cube Rubik's
+    SolvedCube = RubikPuzzle()
+    print("Cube solved initial: ")
+    print(SolvedCube)
 
-    # Desordenar el cubo
-    scramble_moves = 10   # puedes cambiar el número de movimientos
-    initial_cube.Shuffle(scramble_moves)
-    print(f"\nCubo desordenado con {scramble_moves} movimientos:")
-    print(initial_cube)
+    # Make a copy to mix
+    InitialCube = copy.deepcopy(SolvedCube)
 
-    # Crear heurística basada en patrones (opcionalmente puedes cambiar el depth)
-    heuristic = PatternBasedHeuristic(depth=4)
+    # Mixing cube
+    ScrambleMoves = 13
+    InitialCube.Shuffle(ScrambleMoves)
+    print(f"\nCube Mixed with {ScrambleMoves} movements:")
+    print(InitialCube)
 
-    # Definir las funciones requeridas por A*
+    # Create pattern-based heuristics
+    heuristic = PatternBasedHeuristic(depth=4) #Changes
+
+    # Define the functions required by A*
     stop = lambda state: state.configuration == InitialConf
     g = lambda state: state.GetDepth()
     h = lambda state: heuristic.Heurisic(state)
 
-    print("\nEjecutando búsqueda A*...\n")
-    start_time = time.time()
+    print("\nExecute search A*...\n")
+    StartTime = time.time()
 
-    solution = A_Star(initial_cube, stop, g, h)
+    solution = A_Star(InitialCube, stop, g, h)
 
-    end_time = time.time()
-    elapsed = end_time - start_time
+    EndTime = time.time()
+    TotalTime = EndTime - StartTime
 
-    # Mostrar resultados
+    # Results
     if solution is not None:
-        print(f"✅ Solución encontrada en {len(solution)-1} movimientos.")
-        print(f"⏱️ Tiempo total: {elapsed:.2f} segundos\n")
-        print("Trayectoria de solución:\n")
+        print(f"Solution found in {len(solution)-1} movements.")
+        print(f"Total Time: {TotalTime:.2f} seconds\n")
+        print("Solution path:\n")
 
         for i, state in enumerate(solution):
-            print(f"Paso {i}:")
+            print(f"Step {i}:")
             print(state)
             print("-" * 40)
-            time.sleep(0.5)  # para mostrar paso a paso con una pequeña pausa
     else:
-        print("❌ No se encontró solución.")
+        print("Not found solution")
