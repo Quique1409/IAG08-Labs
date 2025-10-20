@@ -310,12 +310,12 @@ class RubikPuzzle(ProblemState):
         """
         Apply the action to the configuration
         """
-        # tupla de acción (eje,renglón,dirección)
-        # giro de izquierda a derecha
+        # Action tuple (axis, row, direction)
+        # Turn from left to right
         if(action[2]==0):
             moved,mask = reduce(lambda x,y:(x[0]|y[0],x[1]|y[1]),\
             [self.move(x) for x in actions[action[0]][action[1]]])
-        else: #giro de derecha a izquierda
+        else: # Turn from right to left
             moved,mask = reduce(lambda x,y:(x[0]|y[0],x[1]|y[1]),\
             [self.move((b,a)) for a,b in actions[action[0]][action[1]]])
         self.configuration = moved | \
@@ -327,10 +327,10 @@ class RubikPuzzle(ProblemState):
         :param locations: the positions to move
         :return: tuple with the moved block and the bit mask
         """
-        # de la posición i a la j
+        # from position i to j
         i = code[locations[0]][0]
         j = code[locations[1]][0]
-        #regresa tanto el bloque movido como la máscara
+        # returns both the moved block and the mask
         return (((((7<<i)&self.configuration)>>i)<<j),(7<<i)|(7<<j))
         
             
@@ -454,41 +454,41 @@ class PatternBasedHeuristic:
         """
         print('computing pattern data base...')
         if(objective==None):
-            # De no establecerse otro objetivo se pide ordenar el cubo
+            # If we don't establish other objective we ask to order the cube 
             objective = RubikPuzzle()
-        # para generar la base de datos nuestra búsqueda es tipo BFS
+        # To generate the data base our search is a BFS type
         agenda = deque()
         self.explored = set()
         self.depth = depth
-        # agregamos el estado objetivo como nodo inicial
+        # We add the objective state as initial node
         agenda.append(objective)
-        # nuestra base de datos es un diccionario
+        # Our data base is a dictionary 
         self.patterns = {}
-        # si el patrón no se especifica usaremos las esquinas
+        # If the pattern is not specified we use the corners
         if(pattern==None):
             pattern ='ACGIJLgiMÑjlOQmñRToqrtxz'
         self.pattern = pattern
-        # obtiene la mascara para este patrón
+        # Obtains the mask for this patterns
         self.pattern_mask = RubikPuzzle.GetpatternMask(pattern)
-        # mientras la agenda no este vacía
+        # While the agenda is not empty
         while(agenda):
-            # sacamos el frente de la agenda (agenda es una cola)
+            # We pop the front of the agenda (the agenda is a queue)
             node = agenda.popleft()
-            # agregamos a expandidos
+            # We add to expanded
             self.explored.add(node)
-            # la configuración del nodo
+            # Configuration for the node
             conf = self.pattern_mask&node.configuration
-            # agregamos la subconfiguración a la base de datos
-            # si es la primera vez que la descubrimos
-            # le asociamos la profundidad
+            # We add the subconfiguration to the data base
+            # If it's the first time we discover it
+            # we associate the depth
             if conf not in self.patterns:
                 self.patterns[conf] = node.depth
             for child in node.Expand():
                 if(child.depth>depth):
-                    #hemos terminado
+                    # All finished
                     return 
                 elif child not in self.explored:
-                    # agregamos al hijo en caso de que no se haya expandido
+                    # We add the child node to the case in which it hasn´t been expanded
                     agenda.append(child)
                     
     def Heurisic(self,puzzle):
@@ -512,7 +512,7 @@ if __name__ == "__main__":
     InitialCube = copy.deepcopy(SolvedCube)
 
     # Mixing cube
-    ScrambleMoves = 13
+    ScrambleMoves = 8
     InitialCube.Shuffle(ScrambleMoves)
     print(f"\nCube Mixed with {ScrambleMoves} movements:")
     print(InitialCube)

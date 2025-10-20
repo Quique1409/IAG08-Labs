@@ -8,6 +8,7 @@ from random import seed
 from termcolor import colored
 from random import choice
 from itertools import product
+import copy
 
 class ProblemState:
     """
@@ -309,12 +310,12 @@ class RubikPuzzle(ProblemState):
         """
         Apply the action to the configuration
         """
-        # tupla de acción (eje,renglón,dirección)
-        # giro de izquierda a derecha
+        # Action tuple (axis, row, direction)
+        # Turn from left to right
         if(action[2]==0):
             moved,mask = reduce(lambda x,y:(x[0]|y[0],x[1]|y[1]),\
             [self.move(x) for x in actions[action[0]][action[1]]])
-        else: #giro de derecha a izquierda
+        else: # Turn from right to left
             moved,mask = reduce(lambda x,y:(x[0]|y[0],x[1]|y[1]),\
             [self.move((b,a)) for a,b in actions[action[0]][action[1]]])
         self.configuration = moved | \
@@ -326,10 +327,10 @@ class RubikPuzzle(ProblemState):
         :param locations: the positions to move
         :return: tuple with the moved block and the bit mask
         """
-        # de la posición i a la j
+        # from position i to j
         i = code[locations[0]][0]
         j = code[locations[1]][0]
-        #regresa tanto el bloque movido como la máscara
+        # returns both the moved block and the mask
         return (((((7<<i)&self.configuration)>>i)<<j),(7<<i)|(7<<j))
         
             
@@ -417,7 +418,7 @@ class RubikPuzzle(ProblemState):
         return reduce(lambda x,y:x|y,[(7<<code[letter][0])\
         for letter in pattern])
     
-    def Getparent(self):
+    def GetParent(self):
         return self.parent
     
     def GetDepth(self):
@@ -453,41 +454,41 @@ class PatternBasedHeuristic:
         """
         print('computing pattern data base...')
         if(objective==None):
-            # De no establecerse otro objetivo se pide ordenar el cubo
+            # If we don't establish other objective we ask to order the cube 
             objective = RubikPuzzle()
-        # para generar la base de datos nuestra búsqueda es tipo BFS
+        # To generate the data base our search is a BFS type
         agenda = deque()
         self.explored = set()
         self.depth = depth
-        # agregamos el estado objetivo como nodo inicial
+        # We add the objective state as initial node
         agenda.append(objective)
-        # nuestra base de datos es un diccionario
+        # Our data base is a dictionary 
         self.patterns = {}
-        # si el patrón no se especifica usaremos las esquinas
+        # If the pattern is not specified we use the corners
         if(pattern==None):
             pattern ='ACGIJLgiMÑjlOQmñRToqrtxz'
         self.pattern = pattern
-        # obtiene la mascara para este patrón
+        # Obtains the mask for this patterns
         self.pattern_mask = RubikPuzzle.GetpatternMask(pattern)
-        # mientras la agenda no este vacía
+        # While the agenda is not empty
         while(agenda):
-            # sacamos el frente de la agenda (agenda es una cola)
+            # We pop the front of the agenda (the agenda is a queue)
             node = agenda.popleft()
-            # agregamos a expandidos
+            # We add to expanded
             self.explored.add(node)
-            # la configuración del nodo
+            # Configuration for the node
             conf = self.pattern_mask&node.configuration
-            # agregamos la subconfiguración a la base de datos
-            # si es la primera vez que la descubrimos
-            # le asociamos la profundidad
+            # We add the subconfiguration to the data base
+            # If it's the first time we discover it
+            # we associate the depth
             if conf not in self.patterns:
                 self.patterns[conf] = node.depth
             for child in node.Expand():
                 if(child.depth>depth):
-                    #hemos terminado
+                    # All finished
                     return 
                 elif child not in self.explored:
-                    # agregamos al hijo en caso de que no se haya expandido
+                    # We add the child node to the case in which it hasn´t been expanded
                     agenda.append(child)
                     
     def Heurisic(self,puzzle):
@@ -500,57 +501,47 @@ class PatternBasedHeuristic:
     
 #---------------------Main----------------------
 
-#we created the corner pattern database, use depth 6
-db1 = PatternBasedHeuristic(depth=6,pattern = "ACGIJLgiMÑjlOQmñRToqrtxz")
+if __name__ == "__main__":
 
-#create the second database for the cross pattern, use depth 6
-db2 = PatternBasedHeuristic(depth=6, pattern = "BDHFKUhWNxKZPancSdpfsuyw")
+    # Create the cube Rubik's
+    SolvedCube = RubikPuzzle()
+    print("Cube solved initial: ")
+    print(SolvedCube)
 
-#we define the heuristics of each base
-h1 = db1.Heurisic
-h2 = db2.Heurisic
+    # Make a copy to mix
+    InitialCube = copy.deepcopy(SolvedCube)
 
-#sum of the heuristics
-print(sum(db1.patterns.values())+sum(db2.patterns.values()))
+    # Mixing cube
+    ScrambleMoves = 8
+    InitialCube.Shuffle(ScrambleMoves)
+    print(f"\nCube Mixed with {ScrambleMoves} movements:")
+    print(InitialCube)
 
-db3 = PatternBasedHeuristic(depth=6,pattern = "ACGIJLgiMÑjlOQmñRToqrtxzBDEFHKNPSUXadVYbeWZcfhknpsuvwy") 
-h = db3.Heurisic
+    # Create pattern-based heuristics
+    heuristic = PatternBasedHeuristic(depth=4) #Changes
 
-seed(20190118)
+    # Define the functions required by A*
+    stop = lambda state: state.configuration == InitialConf
+    g = lambda state: state.GetDepth()
+    h = lambda state: heuristic.Heurisic(state)
 
-# Creamos y desordenamos el cubo
-cube = RubikPuzzle()
-cube.Shuffle(6)
-print("Cubo a resolver:", cube)
+    print("\nExecute search A*...\n")
+    StartTime = time.time()
 
-# Medimos el tiempo solo de la búsqueda A*
-time_initial = time.perf_counter()
-route = A_Star(cube, lambda s:s == RubikPuzzle(), lambda s: s.GetDepth(), h)
-final_time = time.perf_counter()
+    solution = A_Star(InitialCube, stop, g, h)
 
-search_time = final_time - time_initial
+    EndTime = time.time()
+    TotalTime = EndTime - StartTime
 
-# --- NUEVA SECCIÓN DE RESULTADOS ---
+    # Results
+    if solution is not None:
+        print(f"Solution found in {len(solution)-1} movements.")
+        print(f"Total Time: {TotalTime:.2f} seconds\n")
+        print("Solution path:\n")
 
-if route:
-    print("\n--- Pasos de la Solución ---")
-    
-    # Imprime la ruta solo si tiene más de 1 estado (es decir, si no es solo el inicio)
-    if len(route) > 1:
-        for i, estado in enumerate(route[1:], start=1):
-            print(f"Paso {i}:")
-            print(estado) # Esto llama al método __str__ de RubikPuzzle
+        for i, state in enumerate(solution):
+            print(f"Step {i}:")
+            print(state)
+            print("-" * 40)
     else:
-        print("(El cubo ya estaba resuelto)")
-
-    print("\n--- Resumen ---")
-    print(f"Tiempo total: {search_time:.4f} [s]")
-    print(f"Pasos en la ruta: {len(route)-1}")
-else:
-    # Esto se ejecutará si A_Star retorna None (búsqueda fallida)
-    print("\n--- BÚSQUEDA FALLIDA ---")
-    print("No se encontró una solución.")
-    print(f"Tiempo de búsqueda (sin solución): {search_time:.4f} [s]")
-
-
-
+        print("Not found solution")
