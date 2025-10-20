@@ -500,35 +500,46 @@ class PatternBasedHeuristic:
     
 #---------------------Main----------------------
 
-#we created the corner pattern database, use depth 6
-db1 = PatternBasedHeuristic(depth=6,pattern = "ACGIJLgiMÑjlOQmñRToqrtxz")
+if __name__ == "__main__":
+    import time
 
-#create the second database for the cross pattern, use depth 6
-db2 = PatternBasedHeuristic(depth=6, pattern = "BDHFKUhWNxKZPancSdpfsuyw")
+    # Crear el cubo inicial (resuelto)
+    initial_cube = RubikPuzzle()
+    print("Cubo resuelto inicial:")
+    print(initial_cube)
 
-#we define the heuristics of each base
-h1 = db1.Heurisic
-h2 = db2.Heurisic
+    # Desordenar el cubo
+    scramble_moves = 10   # puedes cambiar el número de movimientos
+    initial_cube.Shuffle(scramble_moves)
+    print(f"\nCubo desordenado con {scramble_moves} movimientos:")
+    print(initial_cube)
 
-#sum of the heuristics
-print(sum(db1.patterns.values())+sum(db2.patterns.values()))
+    # Crear heurística basada en patrones (opcionalmente puedes cambiar el depth)
+    heuristic = PatternBasedHeuristic(depth=4)
 
-db3 = PatternBasedHeuristic(depth=6,pattern = "ACGIJLgiMÑjlOQmñRToqrtxzBDEFHKNPSUXadVYbeWZcfhknpsuvwy") 
-h = db3.Heurisic
+    # Definir las funciones requeridas por A*
+    stop = lambda state: state.configuration == InitialConf
+    g = lambda state: state.GetDepth()
+    h = lambda state: heuristic.Heurisic(state)
 
-seed(20190118)
-time_initial = time.perf_counter()
-cube = RubikPuzzle()
-cube.Shuffle(13)
-print("Cube a resolved:", cube)
-route = A_Star(cube, lambda s:s == RubikPuzzle(), lambda s: s.GetDepth(), h)
-res = "".join(str(n.configuration)+str(h(n))+str(h1(n))+str(h2(n)) for n in route)
-print("Routes results (config + h + h1 + h2): ")
-print(res)
-final_time = time.perf_counter()
-time = final_time - time_initial
-print(f"Total Time: {time} [s] ")
-print(f"Route length: {len(route)-1}")
+    print("\nEjecutando búsqueda A*...\n")
+    start_time = time.time()
 
+    solution = A_Star(initial_cube, stop, g, h)
 
+    end_time = time.time()
+    elapsed = end_time - start_time
 
+    # Mostrar resultados
+    if solution is not None:
+        print(f"✅ Solución encontrada en {len(solution)-1} movimientos.")
+        print(f"⏱️ Tiempo total: {elapsed:.2f} segundos\n")
+        print("Trayectoria de solución:\n")
+
+        for i, state in enumerate(solution):
+            print(f"Paso {i}:")
+            print(state)
+            print("-" * 40)
+            time.sleep(0.5)  # para mostrar paso a paso con una pequeña pausa
+    else:
+        print("❌ No se encontró solución.")
