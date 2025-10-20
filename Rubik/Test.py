@@ -512,7 +512,7 @@ if __name__ == "__main__":
     InitialCube = copy.deepcopy(SolvedCube)
 
     # Mixing cube
-    ScrambleMoves = 8
+    ScrambleMoves = 6
     InitialCube.Shuffle(ScrambleMoves)
     print(f"\nCube Mixed with {ScrambleMoves} movements:")
     print(InitialCube)
