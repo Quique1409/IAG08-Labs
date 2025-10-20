@@ -1,5 +1,6 @@
-eje,capa,direccion
-0,1,0
-1,0,1
-2,1,0
-0,1,1
+white,blue,white,cyan,white,blue,cyan,red,blue
+white,green,red,white,green,red,green,yellow,green
+cyan,cyan,blue,red,red,red,yellow,yellow,red
+blue,white,yellow,blue,blue,yellow,blue,yellow,yellow
+yellow,yellow,red,cyan,cyan,cyan,cyan,cyan,cyan
+green,green,white,red,yellow,red,white,white,blue

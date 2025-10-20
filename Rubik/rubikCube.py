@@ -9,6 +9,9 @@ from termcolor import colored
 from random import choice
 from itertools import product
 import copy
+import csv
+import sys
+import os
 
 class ProblemState:
     """
@@ -104,13 +107,34 @@ C = 4;
 Y = 5;
 
 #Dictionary with names for codes
-color_map = {
+ColorMap = {
     0:"white",
     1:"green",
     2:"red",
     3:"blue",
     4:"cyan",
     5:"yellow"}
+
+#Map inverse, from read the CSV
+colorNameMap = {name: code for code, name in ColorMap.items()}
+
+"""
+letter diagram:
+Face 1 (top): ABCDEFGHI | White
+Face 2 (Left): JKLUVWghi    | Green
+Face 3 (Front): MNÑXYZjkl   | Red
+Face 4 (Right): OPQabcmnñ   | Blue
+Face 5 (Back): RSTdefopq    | Cyan
+Face 6 (Bottom): rstuvwxyz  | Yellow
+"""
+faceLetters = [
+    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'], # White
+    ['J', 'K', 'L', 'U', 'V', 'W', 'g', 'h', 'i'], # Green
+    ['M', 'N', 'Ñ', 'X', 'Y', 'Z', 'j', 'k', 'l'], #  Red
+    ['O', 'P', 'Q', 'a', 'b', 'c', 'm', 'n', 'ñ'], #  Blue
+    ['R', 'S', 'T', 'd', 'e', 'f', 'o', 'p', 'q'], #  Cyan
+    ['r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']  #  Yellow
+]
 
 """
 Each letter will be a position relative to the colors of the cubes in the 
@@ -304,7 +328,7 @@ class RubikPuzzle(ProblemState):
         """
         n = code[symbol][0]
         return \
-        colored(chr(FILL),color_map[(((7<<n)&self.configuration)>>n)])*K
+        colored(chr(FILL),ColorMap[(((7<<n)&self.configuration)>>n)])*K
         
     def apply(self,action):
         """
@@ -499,6 +523,56 @@ class PatternBasedHeuristic:
         return (self.patterns[key] \
         if key in self.patterns else self.depth+1)
     
+def LoadCubeCSV(filename):
+    """
+    Loads a cube configuration from a CSV file.
+    :param filename: The path to the .csv file
+    :return: A 'pattern' dictionary for RubikPuzzle, or None if there is an error
+    """
+    print(f"Loading the cube state from '{filename}'...")
+    pattern = {}
+    try:
+        with open(filename, 'r', newline='', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            AllRows = list(reader)
+            
+            if len(AllRows) != 6:
+                print(f"Error: The CSV must have exactly 6 rows (one per face). Found {len(AllRows)}.")
+                return None
+
+            for RowIndex, row in enumerate(AllRows):
+                
+                if len(row) != 9:
+                    print(f"Error: The row {RowIndex+1} must have 9 color values. Found {len(row)}.")
+                    print(f"Row data: {row}")
+                    return None
+                
+                LettersForFaces = faceLetters[RowIndex]
+                
+                for ColIndex, ColorName in enumerate(row):
+                    ColorNameClean = ColorName.strip().lower()
+                    
+                    if ColorNameClean not in colorNameMap:
+                        if ColorNameClean == "":
+                            print(f"Error: Empty cell found in row {RowIndex+1}, column {ColIndex+1}.")
+                        else:
+                            print(f"Error: Unknown color '{ColorName}' in row {RowIndex+1}, column {ColIndex+1}.")
+                        return None
+                    
+                    letter = LettersForFaces[ColIndex]
+                    color_code = colorNameMap[ColorNameClean]
+                    pattern[letter] = color_code
+                    
+    except FileNotFoundError:
+        print(f"Error: File not found in '{filename}'")
+        return None
+    except Exception as e:
+        print(f"An error occurred while reading the CSV: {e}")
+        return None
+    
+    print("CSV file uploaded successfully.")
+    return pattern
+    
 #---------------------Main----------------------
 
 if __name__ == "__main__":
@@ -508,13 +582,23 @@ if __name__ == "__main__":
     print("Cube solved initial: ")
     print(SolvedCube)
 
-    # Make a copy to mix
-    InitialCube = copy.deepcopy(SolvedCube)
+    ScriptDir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Une la ruta del script con el nombre del archivo CSV
+    CSVFile = os.path.join(ScriptDir, 'Moves.csv')
 
-    # Mixing cube
-    ScrambleMoves = 8
-    InitialCube.Shuffle(ScrambleMoves)
-    print(f"\nCube Mixed with {ScrambleMoves} movements:")
+    # CSVFile = 'Moves.csv'
+    
+    # Charge File
+    ScramblePattern = LoadCubeCSV(CSVFile)
+    
+    if ScramblePattern is None:
+        print("Error loading cube from CSV. Exiting.")
+        sys.exit(1)
+
+    InitialCube = RubikPuzzle(pattern=ScramblePattern)
+    
+    print(f"\nCube loaded from '{CSVFile}':")
     print(InitialCube)
 
     # Create pattern-based heuristics
