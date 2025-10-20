@@ -475,6 +475,7 @@ class ManhattanDistance:
         """
         # no consideramos la posición del cero
         return sum(map(lambda i:self.distances[i[0]+1][i[1]],\
+        
         enumerate(self._find_locations(puzzle)[1:])))
     
 m = ManhattanDistance(target=Puzzle())
