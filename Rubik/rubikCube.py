@@ -4,41 +4,13 @@ from functools import reduce
 import random
 from collections import deque
 import heapq
-from random import seed
+from random import seed, choice
 from termcolor import colored
-from random import choice
 from itertools import product
-import copy
 import csv
 import sys
 import os
 
-class ProblemState:
-    """
-    The class ProblemState is abstract.
-    It represents a state or configuration of the problem to be solved.
-    """
-
-    @abstractmethod
-    def Expand(self):
-        """
-        :return: set of successor states
-        """
-        pass
-    
-    @abstractmethod
-    def GetDepth(self):
-        """
-        :return: depth of the state
-        """
-        pass
-
-    @abstractmethod
-    def GetParent(self):
-        """
-        :return: reference of the predecessor state
-        """
-        pass
 
 def Trajectory(end):
     """
@@ -52,18 +24,15 @@ def Trajectory(end):
     sequence.reverse()
     return list(sequence)
 
-class AStar:
-    """
-    Implementation of the A* algorithm
-    """
-
+class AStar: #Implementation of the A* algorithm
+  
     @staticmethod
     def search(origin, stop,g,h):
         """
-        :param source: Initial state
-        :param stop: Stop funtion, true for the goal state
-        :param g: Cumulative cost function
-        :param h: Heuristic function, estimated cost to the goal
+        origin: Initial state
+        stop: Stop funtion, true for the goal state
+        g: Cumulative cost function
+        h: Heuristic function, estimated cost to the goal
         """
         #Priority queue
         agenda = []
@@ -73,19 +42,33 @@ class AStar:
         if stop(origin):
             return Trajectory(origin)
         
-        #Initial state of the priority queue | The priority will be f(s) = g(s) + h(s)
+        #Initial state of the priority queue
         f = lambda s: g(s) + h(s)
-        heapq.heappush(agenda,(f(origin), origin))
+        
+        #tie-breaker, in the case is a tie in the cost between two nodes
+        tie_breaker_counter = 0
+        #This was implemented because the desicion makingfor the algorithm turned probabilistic when the cost were the same, this way
+        #we made sure the algorithm would always take the same path
+        #Tuple with 3 elements: (f_cost, tie_breaker_counter, node)
+        heapq.heappush(agenda,(f(origin), tie_breaker_counter, origin))
+        tie_breaker_counter += 1
 
         #While agenda unlike empty
         while agenda:
-            node = heapq.heappop(agenda)[1]
+            # We pop the full tuple and get the node at index [2]
+            node = heapq.heappop(agenda)[2] 
+            # Check if node was already expanded. This check is needed because we might add the same node multiple times with different f-costs before expanding it.
+            if node in expanded:
+                continue
+                
             expanded.add(node)
+            
             if stop(node):
                 return Trajectory(node)
             for sucessor in node.Expand():
                 if sucessor not in expanded:
-                    heapq.heappush(agenda, (f(sucessor), sucessor))
+                    heapq.heappush(agenda, (f(sucessor), tie_breaker_counter, sucessor))
+                    tie_breaker_counter += 1
         return None
     
 #Definition in the function for A*
@@ -284,7 +267,7 @@ actions = [
 InitialConf = reduce(lambda x,y:(0,x[1]|(y[1]<<y[0])), \
 [(0,0)]+[v for k,v in code.items()])[1]
 
-class RubikPuzzle(ProblemState):
+class RubikPuzzle:
     """
     3 x 3 Rubik's Cube. Implementation with all subcubes
     Each subcube has a triplet of bits that encode its color
@@ -409,8 +392,9 @@ class RubikPuzzle(ProblemState):
     def __lt__(self,other):
         """
         Determines if the depth of one cube is less than the depth of another
-        :param other: The other cube
-        :return: true if the depth of one cube is less than the other
+        other: The other cube
+        return: true if the depth of one cube is less than the other
+        Used as tiebreaker before implementing tie-breaker-counter, kept in case the tie breaker doesnt work (theorically impossible)
         """
         return self.depth < other.depth
 
@@ -446,15 +430,7 @@ class RubikPuzzle(ProblemState):
         return self.parent
     
     def GetDepth(self):
-        return self.depth
-        
-    def Shuffle(self,n):
-        """
-        Disorder the cube
-        :param n: Number of movements
-        """
-        for i in range(0,n):
-            self.apply((choice([0,1,2]),choice([0,1]),choice([0,1])))
+        return self.depth       
             
     def Expand(self):
         # we remove the predecessor
@@ -585,9 +561,8 @@ if __name__ == "__main__":
     ScriptDir = os.path.dirname(os.path.abspath(__file__))
     
     # Une la ruta del script con el nombre del archivo CSV
-    CSVFile = os.path.join(ScriptDir, 'Moves.csv')
-
-    # CSVFile = 'Moves.csv'
+    CSVFile = os.path.join(ScriptDir, 'Moves.csv')  # CSVFile = 'Moves.csv'
+   
     
     # Charge File
     ScramblePattern = LoadCubeCSV(CSVFile)
