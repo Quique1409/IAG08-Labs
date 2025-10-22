@@ -10,32 +10,6 @@ from random import choice
 from itertools import product
 import copy
 
-class ProblemState:
-    """
-    The class ProblemState is abstract.
-    It represents a state or configuration of the problem to be solved.
-    """
-
-    @abstractmethod
-    def Expand(self):
-        """
-        :return: set of successor states
-        """
-        pass
-    
-    @abstractmethod
-    def GetDepth(self):
-        """
-        :return: depth of the state
-        """
-        pass
-
-    @abstractmethod
-    def GetParent(self):
-        """
-        :return: reference of the predecessor state
-        """
-        pass
 
 def Trajectory(end):
     """
@@ -260,7 +234,7 @@ actions = [
 InitialConf = reduce(lambda x,y:(0,x[1]|(y[1]<<y[0])), \
 [(0,0)]+[v for k,v in code.items()])[1]
 
-class RubikPuzzle(ProblemState):
+class RubikPuzzle():
     """
     3 x 3 Rubik's Cube. Implementation with all subcubes
     Each subcube has a triplet of bits that encode its color
@@ -512,13 +486,13 @@ if __name__ == "__main__":
     InitialCube = copy.deepcopy(SolvedCube)
 
     # Mixing cube
-    ScrambleMoves = 6
+    ScrambleMoves = 15
     InitialCube.Shuffle(ScrambleMoves)
     print(f"\nCube Mixed with {ScrambleMoves} movements:")
     print(InitialCube)
 
     # Create pattern-based heuristics
-    heuristic = PatternBasedHeuristic(depth=4) #Changes
+    heuristic = PatternBasedHeuristic(depth=6) #Changes
 
     # Define the functions required by A*
     stop = lambda state: state.configuration == InitialConf
