@@ -1,6 +1,6 @@
-green,red,yellow,yellow,white,green,yellow,white,blue
-red,blue,blue,cyan,cyan,blue,cyan,cyan,green
-red,green,cyan,red,green,white,cyan,blue,white
-white,red,green,red,red,green,red,yellow,red
-cyan,yellow,yellow,cyan,blue,blue,white,cyan,blue
-white,white,green,yellow,yellow,green,yellow,white,blue
+yellow, cyan, green, red, white, white, yellow, red, white
+cyan, white, cyan, blue, cyan, green, red, yellow, white
+blue, green, blue, yellow, green, white, green, blue, blue
+cyan, blue, red, green, red, blue, yellow, white, red
+white, green, green, yellow, blue, cyan, yellow, yellow, blue
+cyan, red, red, cyan, yellow, cyan, white, red, green
