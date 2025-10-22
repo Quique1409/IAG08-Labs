@@ -9,9 +9,7 @@ from termcolor import colored
 from random import choice
 from itertools import product
 import copy
-import csv
-import sys
-import os
+
 
 def Trajectory(end):
     """
@@ -80,34 +78,13 @@ C = 4;
 Y = 5;
 
 #Dictionary with names for codes
-ColorMap = {
+color_map = {
     0:"white",
     1:"green",
     2:"red",
     3:"blue",
     4:"cyan",
     5:"yellow"}
-
-#Map inverse, from read the CSV
-colorNameMap = {name: code for code, name in ColorMap.items()}
-
-"""
-letter diagram:
-Face 1 (top): ABCDEFGHI | White
-Face 2 (Left): JKLUVWghi    | Green
-Face 3 (Front): MNÑXYZjkl   | Red
-Face 4 (Right): OPQabcmnñ   | Blue
-Face 5 (Back): RSTdefopq    | Cyan
-Face 6 (Bottom): rstuvwxyz  | Yellow
-"""
-faceLetters = [
-    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'], # White
-    ['J', 'K', 'L', 'U', 'V', 'W', 'g', 'h', 'i'], # Green
-    ['M', 'N', 'Ñ', 'X', 'Y', 'Z', 'j', 'k', 'l'], #  Red
-    ['O', 'P', 'Q', 'a', 'b', 'c', 'm', 'n', 'ñ'], #  Blue
-    ['R', 'S', 'T', 'd', 'e', 'f', 'o', 'p', 'q'], #  Cyan
-    ['r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']  #  Yellow
-]
 
 """
 Each letter will be a position relative to the colors of the cubes in the 
@@ -145,42 +122,42 @@ code = {
     'G' : (18,W),
     'H' : (21,W),
     'I' : (24,W),
-    'J' : (27,C),
-    'K' : (30,C),
-    'L' : (33,C),
-    'M' : (36,G),
-    'N' : (39,G),
-    'Ñ' : (42,G),
-    'O' : (45,R),
-    'P' : (48,R),
-    'Q' : (51,R),
-    'R' : (54,B),
-    'S' : (57,B),
-    'T' : (60,B),
-    'U' : (63,C),
-    'V' : (66,C),
-    'W' : (69,C),
-    'X' : (72,G),
-    'Y' : (75,G),
-    'Z' : (78,G),
-    'a' : (81,R),
-    'b' : (84,R),
-    'c' : (87,R),
-    'd' : (90,B),
-    'e' : (93,B),
-    'f' : (96,B),
-    'g' : (99,C),
-    'h' : (102,C),
-    'i' : (105,C),
-    'j' : (108,G),
-    'k' : (111,G),
-    'l' : (114,G),
-    'm' : (117,R),
-    'n' : (120,R),
-    'ñ' : (123,R),
-    'o' : (126,B),
-    'p' : (129,B),
-    'q' : (132,B),
+    'J' : (27,G),
+    'K' : (30,G),
+    'L' : (33,G),
+    'M' : (36,R),
+    'N' : (39,R),
+    'Ñ' : (42,R),
+    'O' : (45,B),
+    'P' : (48,B),
+    'Q' : (51,B),
+    'R' : (54,C),
+    'S' : (57,C),
+    'T' : (60,C),
+    'U' : (63,G),
+    'V' : (66,G),
+    'W' : (69,G),
+    'X' : (72,R),
+    'Y' : (75,R),
+    'Z' : (78,R),
+    'a' : (81,B),
+    'b' : (84,B),
+    'c' : (87,B),
+    'd' : (90,C),
+    'e' : (93,C),
+    'f' : (96,C),
+    'g' : (99,G),
+    'h' : (102,G),
+    'i' : (105,G),
+    'j' : (108,R),
+    'k' : (111,R),
+    'l' : (114,R),
+    'm' : (117,B),
+    'n' : (120,B),
+    'ñ' : (123,B),
+    'o' : (126,C),
+    'p' : (129,C),
+    'q' : (132,C),
     'r' : (135,Y),
     's' : (138,Y),
     't' : (141,Y),
@@ -301,7 +278,7 @@ class RubikPuzzle():
         """
         n = code[symbol][0]
         return \
-        colored(chr(FILL),ColorMap[(((7<<n)&self.configuration)>>n)])*K
+        colored(chr(FILL),color_map[(((7<<n)&self.configuration)>>n)])*K
         
     def apply(self,action):
         """
@@ -496,56 +473,6 @@ class PatternBasedHeuristic:
         return (self.patterns[key] \
         if key in self.patterns else self.depth+1)
     
-def LoadCubeCSV(filename):
-    """
-    Loads a cube configuration from a CSV file.
-    :param filename: The path to the .csv file
-    :return: A 'pattern' dictionary for RubikPuzzle, or None if there is an error
-    """
-    print(f"Loading the cube state from '{filename}'...")
-    pattern = {}
-    try:
-        with open(filename, 'r', newline='', encoding='utf-8') as f:
-            reader = csv.reader(f)
-            AllRows = list(reader)
-            
-            if len(AllRows) != 6:
-                print(f"Error: The CSV must have exactly 6 rows (one per face). Found {len(AllRows)}.")
-                return None
-
-            for RowIndex, row in enumerate(AllRows):
-                
-                if len(row) != 9:
-                    print(f"Error: The row {RowIndex+1} must have 9 color values. Found {len(row)}.")
-                    print(f"Row data: {row}")
-                    return None
-                
-                LettersForFaces = faceLetters[RowIndex]
-                
-                for ColIndex, ColorName in enumerate(row):
-                    ColorNameClean = ColorName.strip().lower()
-                    
-                    if ColorNameClean not in colorNameMap:
-                        if ColorNameClean == "":
-                            print(f"Error: Empty cell found in row {RowIndex+1}, column {ColIndex+1}.")
-                        else:
-                            print(f"Error: Unknown color '{ColorName}' in row {RowIndex+1}, column {ColIndex+1}.")
-                        return None
-                    
-                    letter = LettersForFaces[ColIndex]
-                    color_code = colorNameMap[ColorNameClean]
-                    pattern[letter] = color_code
-                    
-    except FileNotFoundError:
-        print(f"Error: File not found in '{filename}'")
-        return None
-    except Exception as e:
-        print(f"An error occurred while reading the CSV: {e}")
-        return None
-    
-    print("CSV file uploaded successfully.")
-    return pattern
-    
 #---------------------Main----------------------
 
 if __name__ == "__main__":
@@ -555,27 +482,17 @@ if __name__ == "__main__":
     print("Cube solved initial: ")
     print(SolvedCube)
 
-    ScriptDir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Une la ruta del script con el nombre del archivo CSV
-    CSVFile = os.path.join(ScriptDir, 'Moves.csv')
+    # Make a copy to mix
+    InitialCube = copy.deepcopy(SolvedCube)
 
-    # CSVFile = 'Moves.csv'
-    
-    # Charge File
-    ScramblePattern = LoadCubeCSV(CSVFile)
-    
-    if ScramblePattern is None:
-        print("Error loading cube from CSV. Exiting.")
-        sys.exit(1)
-
-    InitialCube = RubikPuzzle(pattern=ScramblePattern)
-    
-    print(f"\nCube loaded from '{CSVFile}':")
+    # Mixing cube
+    ScrambleMoves = 15
+    InitialCube.Shuffle(ScrambleMoves)
+    print(f"\nCube Mixed with {ScrambleMoves} movements:")
     print(InitialCube)
 
     # Create pattern-based heuristics
-    heuristic = PatternBasedHeuristic(depth=4) #Changes
+    heuristic = PatternBasedHeuristic(depth=6) #Changes
 
     # Define the functions required by A*
     stop = lambda state: state.configuration == InitialConf
