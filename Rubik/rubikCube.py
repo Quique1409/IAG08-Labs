@@ -1,10 +1,8 @@
-from abc import ABC, abstractmethod
 import time
 from functools import reduce
-import random
 from collections import deque
-import heapq
-from random import seed, choice
+import heapq # Still used by PatternBasedHeuristic (if you keep it)
+from random import seed, choice # 'choice' is used by the unused 'Shuffle'
 from termcolor import colored
 from itertools import product
 import csv
@@ -24,56 +22,98 @@ def Trajectory(end):
     sequence.reverse()
     return list(sequence)
 
-class AStar: #Implementation of the A* algorithm
-  
-    @staticmethod
-    def search(origin, stop,g,h):
-        """
-        origin: Initial state
-        stop: Stop funtion, true for the goal state
-        g: Cumulative cost function
-        h: Heuristic function, estimated cost to the goal
-        """
-        #Priority queue
-        agenda = []
-        # Set of state expanded
-        expanded = set()
-        #Trivial condition
-        if stop(origin):
-            return Trajectory(origin)
-        
-        #Initial state of the priority queue
-        f = lambda s: g(s) + h(s)
-        
-        #tie-breaker, in the case is a tie in the cost between two nodes
-        tie_breaker_counter = 0
-        #This was implemented because the desicion makingfor the algorithm turned probabilistic when the cost were the same, this way
-        #we made sure the algorithm would always take the same path
-        #Tuple with 3 elements: (f_cost, tie_breaker_counter, node)
-        heapq.heappush(agenda,(f(origin), tie_breaker_counter, origin))
-        tie_breaker_counter += 1
+# --- (Start of IDAStar Class Implementation) ---
 
-        #While agenda unlike empty
-        while agenda:
-            # We pop the full tuple and get the node at index [2]
-            node = heapq.heappop(agenda)[2] 
-            # Check if node was already expanded. This check is needed because we might add the same node multiple times with different f-costs before expanding it.
-            if node in expanded:
-                continue
-                
-            expanded.add(node)
+class IDAStar:
+    """
+    Implementation of the IDA* (Iterative Deepening A*) algorithm.
+    This class encapsulates the search logic, including the main
+    iterative loop and the private recursive search helper.
+    """
+
+    @staticmethod
+    def _search_recursive(node, stop, g, h, bound):
+        """
+        Internal recursive DFS function for IDA*.
+        This function performs a depth-first search with a cost bound.
+        
+        :param node: The current state (RubikPuzzle)
+        :param stop: Stop function (lambda)
+        :param g: Cost function g(s) (lambda)
+        :param h: Heuristic function h(s) (lambda)
+        :param bound: The current f-cost limit for this iteration
+        :return: A tuple (found, value)
+                 - (True, solution_node) if the goal is found.
+                 - (False, next_bound) if not found. 'next_bound' is the minimum
+                   f-cost that exceeded the current 'bound'.
+        """
+        # Calculate the f-cost for the current node
+        # f(s) = g(s) + h(s)
+        f_cost = g(node) + h(node)
+
+        # 1. Pruning Check:
+        if f_cost > bound:
+            return (False, f_cost) # Return the cost that exceeded the bound
+
+        # 2. Goal Check:
+        if stop(node):
+            return (True, node) # Return the solution node
+
+        min_next_bound = float('inf') 
+
+        # 3. Expansion / Recursion:
+        for successor in node.Expand():
             
-            if stop(node):
-                return Trajectory(node)
-            for sucessor in node.Expand():
-                if sucessor not in expanded:
-                    heapq.heappush(agenda, (f(sucessor), tie_breaker_counter, sucessor))
-                    tie_breaker_counter += 1
-        return None
-    
-#Definition in the function for A*
-def A_Star(p, stop, g, h):
-    return AStar.search(p, stop, g, h)
+            found, value = IDAStar._search_recursive(successor, stop, g, h, bound)
+            
+            if found:
+                return (True, value)
+            
+            if value < min_next_bound:
+                min_next_bound = value
+                
+        return (False, min_next_bound)
+
+    @staticmethod
+    def search(origin, stop, g, h):
+        """
+        Main public method to start the IDA* search.
+        This function contains the iterative loop that increases the cost bound.
+
+        :param origin: Initial state (the scrambled cube)
+        :param stop: Stop funtion, true for the goal state
+        :param g: Cumulative cost function (node.GetDepth)
+        :param h: Heuristic function (PDB lookup)
+        """
+        # The initial bound is the heuristic cost of the starting node.
+        bound = h(origin)
+        
+        print(f"Starting IDA* search with initial bound: {bound}")
+        
+        while True:
+            # Call the internal recursive helper
+            found, value = IDAStar._search_recursive(origin, stop, g, h, bound)
+            
+            # 1. Solution Found
+            if found:
+                print("\nSolution found!")
+                return Trajectory(value) # 'value' is the goal node
+            
+            # 2. No Solution Possible
+            if value == float('inf'):
+                print("\nNo solution found (entire space explored).")
+                return None
+            
+            # 3. No Solution Found in this iteration
+            print(f"Bound {bound} failed, increasing to {value}")
+            bound = value
+
+# --- (End of IDAStar Class Implementation) ---
+
+
+#Definition in the function for IDA*
+def IDA_Star(p, stop, g, h):
+    return IDAStar.search(p, stop, g, h)
 
 #Color codes
 #White
@@ -577,7 +617,11 @@ if __name__ == "__main__":
     print(InitialCube)
 
     # Create pattern-based heuristics
-    heuristic = PatternBasedHeuristic(depth=4) #Changes
+    StartTime = time.time()
+    heuristic = PatternBasedHeuristic(depth=7) #Changes
+    EndTime = time.time()
+    TotalTime = EndTime - StartTime
+    print(f"Pdb generated in: {TotalTime:.2f} seconds\n")
 
     # Define the functions required by A*
     stop = lambda state: state.configuration == InitialConf
@@ -587,7 +631,7 @@ if __name__ == "__main__":
     print("\nExecute search A*...\n")
     StartTime = time.time()
 
-    solution = A_Star(InitialCube, stop, g, h)
+    solution = IDA_Star(InitialCube, stop, g, h)
 
     EndTime = time.time()
     TotalTime = EndTime - StartTime
