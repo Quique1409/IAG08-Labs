@@ -15,10 +15,10 @@ def jumps_SnakesandLadders():
     If you land at the key, you move to the value.
     """
     jump_map = {
-        # Ladders
-        1: 38, 4: 14, 8: 30, 21: 42, 28: 76, 50: 67, 71: 92, 80: 99,
+        # Stairs
+        3: 19, 7:33, 22: 58, 40:59, 48: 85, 56: 79, 69: 87, 80: 98,
         # Snakes
-        32: 10, 36: 6, 48: 26, 62: 18, 88: 24, 95: 56, 97: 78,
+        96: 58, 89: 47, 80: 39, 66: 1, 44: 26, 52: 49, 37: 18, 47: 9
     }
     return jump_map
 
