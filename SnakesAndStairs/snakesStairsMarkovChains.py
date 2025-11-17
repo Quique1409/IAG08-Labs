@@ -6,80 +6,68 @@ np.set_printoptions(precision=4, suppress=True)
 
 # --- 1. Constantes y Definición del Tablero ---
 
-N_ESTADOS = 101  # Estados del 0 (inicio) al 100 (victoria)
-N_CARAS = 6
-PROB_DADO = 1.0 / N_CARAS
+NUM_STATES = 101  # Estados del 0 al 80
+NUM_FACES = 6
+PROB_DADO = 1.0 / NUM_FACES
 
-def obtener_mapa_saltos():
-    """
-    Define y devuelve el mapeo de serpientes y escaleras.
-    Si aterrizas en 'llave', te mueves instantáneamente a 'valor'.
-    """
-    mapa_saltos = {
-        # Escaleras
-        1: 38, 4: 14, 9: 31, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 80: 100,
-        # Serpientes
-        16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 98: 78,
+def get_jump_map():
+    #map for snakes and stairs
+    jump_map = {
+        # Stairs
+        3: 19, 7:33, 22: 58, 40:59, 48: 85, 56: 79, 69: 87, 80: 9,
+        # Snakes
+        96: 58, 89: 47, 80: 39, 66: 1, 44: 26, 52: 49, 37: 18, 47: 9
     }
-    return mapa_saltos
+    return jump_map
 
-# --- 2. Lógica de la Cadena de Markov (en funciones) ---
+def create_tran_matrix(NUM_STATES, jump_map):
+    #constructing the transition matrix based on the possibles moves
+    M = np.zeros((NUM_STATES, NUM_STATES))
+    prob_dado = 1.0 / 6
 
-def crear_matriz_transicion(n_estados, n_caras, mapa_saltos):
-    """
-    Construye la matriz de transición P (101x101) basada
-    en las reglas del juego.
-    """
-    P = np.zeros((n_estados, n_estados))
-    prob_dado = 1.0 / n_caras
-
-    # Rellenar la matriz para los estados transitorios (0 a 99)
-    for i in range(n_estados - 1):  # i = estado actual (0 a 99)
-        for dado in range(1, n_caras + 1):  # j = tirada del dado (1 a 6)
-            
-            destino_temp = i + dado
-            
-            # --- Inicio de la Lógica de Reglas (Tu lógica) ---
-            if destino_temp > 100:
-                # Regla "Overshoot": te quedas en la casilla actual
-                destino_final = i
-            elif destino_temp in mapa_saltos:
-                # Caíste en una serpiente o escalera
-                destino_final = mapa_saltos[destino_temp]
+    # fill the transition matrix P
+    for i in range(NUM_STATES - 1):  # i = actual state (0 a 99)
+        for dado in range(1, 7):  # iteramos sobre cada resultado del lado (1 a 6)
+            d_temp = i + dado
+            if d_temp > 100:
+                #if we pass from the goal state, we stay in the same state and it means that we already win
+                d_final = i
+            elif d_temp in jump_map:
+                # we are in a snake or stair
+                d_final = jump_map[d_temp] #the state given is the key for the and it return the new position on the board
             else:
-                # Movimiento normal
-                destino_final = destino_temp
-            # --- Fin de la Lógica de Reglas ---
-                
-            # Añadir la probabilidad (1/6) a la celda correspondiente
-            P[i, destino_final] += prob_dado
+                # we finish normaly
+                d_final = d_temp                
+            # Update the transition probability for go from state i to d_final
+            M[i, d_final] += prob_dado
 
-    # Definir el estado absorbente (Victoria)
-    # Si llegas a 100, te quedas en 100 (P_100,100 = 1)
-    P[100, 100] = 1.0
+    # If we reach the goal state (100), we stay there 100%
+    M[100, 100] = 1.0
     
-    return P
+    return M #we return the transition matrix
 
-def calcular_prob_k_pasos(P, v0, k):
+def calculate_prob_k_moves(M, v0, k):
     """
-    Calcula la distribución de probabilidad v_k = v0 * P^k
-    """
+    #calculate the probability distribution after k steps
+    # M: transition matrix 
+    # v0: initial state vector
+    # k: number of steps"""
     try:
-        P_k = np.linalg.matrix_power(P, k)
+        P_k = np.linalg.matrix_power(M, k)
         v_k = v0 @ P_k
         return v_k
     except np.linalg.LinAlgError as e:
         print(f"Error al calcular P^{k}: {e}")
         return None
 
-def calcular_movimientos_esperados(P):
+def expected_moves(P):
     """
-    Calcula el número esperado de movimientos para ganar
+    Calculate the expected number of moves
     usando la Matriz Fundamental N = (I - Q)^-1
     """
     # Q = Transiciones entre estados transitorios (0-99)
-    # (Tomamos N_ESTADOS-1 para ser genéricos, o sea, 100)
-    transient_states = N_ESTADOS - 1
+    # (Tomamos NUM_STATES-1 para ser genéricos, o sea, 100)
+    transient_states = NUM_STATES - 1
     Q = P[0:transient_states, 0:transient_states]
     
     # I = Matriz identidad (100x100)
@@ -101,28 +89,24 @@ def calcular_movimientos_esperados(P):
     t = N @ ones_vector
     
     # Queremos el tiempo esperado empezando desde el estado 0
-    movimientos_esperados = t[0, 0]
-    return movimientos_esperados
-
-
-# --- 3. Ejecución Principal (main) ---
+    moves = t[0, 0]
+    return moves
 
 def main():
-    print("--- 1. Construyendo Matriz de Transición P ---")
-    mapa = obtener_mapa_saltos()
-    P = crear_matriz_transicion(N_ESTADOS, N_CARAS, mapa)
-    print(f"Forma de P: {P.shape}")
-    print(f"Suma de la fila 0 (debe ser 1.0): {P[0].sum():.1f}")
-    print(f"Suma de la fila 97 (debe ser 1.0): {P[97].sum():.1f}")
-    print(f"Suma de la fila 100 (debe ser 1.0): {P[100].sum():.1f}")
+    SS = get_jump_map()
+    M = create_tran_matrix(NUM_STATES, SS)
+    print(f"Forma de P: {M.shape}")
+    print(f"Suma de la fila 0 (debe ser 1.0): {M[0].sum():.1f}")
+    print(f"Suma de la fila 97 (debe ser 1.0): {M[97].sum():.1f}")
+    print(f"Suma de la fila 100 (debe ser 1.0): {M[100].sum():.1f}")
     print("-" * 30)
     
     # Vector de estado inicial v0 = [1, 0, 0, ...]
-    v0 = np.zeros((1, N_ESTADOS))
+    v0 = np.zeros((1, NUM_STATES))
     v0[0, 0] = 1.0
     
     print("--- 2. Probabilidad después de k=25 movimientos ---")
-    v_25 = calcular_prob_k_pasos(P, v0, 25)
+    v_25 = calculate_prob_k_moves(M, v0, 25)
     if v_25 is not None:
         print(f"Prob. de estar en la casilla 14: {v_25[0, 14]:.4%}")
         print(f"Prob. de estar en la casilla 53: {v_25[0, 53]:.4%}")
@@ -131,7 +115,7 @@ def main():
     print("-" * 30)
 
     print("--- 3. Probabilidad después de k=50 movimientos ---")
-    v_50 = calcular_prob_k_pasos(P, v0, 50)
+    v_50 = calculate_prob_k_moves(M, v0, 50)
     if v_50 is not None:
         print(f"Prob. de estar en la casilla 14: {v_50[0, 14]:.4%}")
         print(f"Prob. de estar en la casilla 53: {v_50[0, 53]:.4%}")
@@ -140,7 +124,7 @@ def main():
     print("-" * 30)
 
     print("--- 4. (Nota Completa) Número Esperado de Movimientos ---")
-    movimientos_esperados = calcular_movimientos_esperados(P)
+    movimientos_esperados = expected_moves(M)
     if movimientos_esperados is not None:
         print(f"El número esperado de movimientos para ganar el juego es:")
         print(f"==> {movimientos_esperados:.4f} movimientos")
