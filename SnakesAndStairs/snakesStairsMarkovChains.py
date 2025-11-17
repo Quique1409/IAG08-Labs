@@ -87,6 +87,8 @@ def expected_moves(P):
         N = np.linalg.inv(I - Q)
         end_time = time.time()
         print(f"(Getting N=(I-Q)^-1 took {end_time - start_time:.4f}s)")
+        print("Saving the fundamental matrix N in 'fundamental_matrix_N.csv'...")
+        np.savetxt("fundamental_matrix_N.csv", N, delimiter=",", fmt='%.4f')
         
     except np.linalg.LinAlgError as e:
         print(f"Error obtaining the invert matrix (I-Q): {e}")
@@ -133,7 +135,7 @@ def main():
     if v_50 is not None:
         prob_50 = v_50.flatten() 
         for i in range(N_States):
-            print(f"  Casilla {i:3d}: {prob_50[i]:.6%}")
+            print(f"  Box {i:3d}: {prob_50[i]:.6%}")
         print(f"PROBABILITY OF HAVING WON: {prob_50[100]:.6%}")
     print("-" * 30)
 
