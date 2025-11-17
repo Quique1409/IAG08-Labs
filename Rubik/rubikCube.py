@@ -618,7 +618,7 @@ if __name__ == "__main__":
 
     # Create pattern-based heuristics
     StartTime = time.time()
-    heuristic = PatternBasedHeuristic(depth=6) #Changes
+    heuristic = PatternBasedHeuristic(depth=3) #Changes
     EndTime = time.time()
     TotalTime = EndTime - StartTime
     print(f"Pdb generated in: {TotalTime:.2f} seconds\n")
@@ -634,12 +634,12 @@ if __name__ == "__main__":
     solution = IDA_Star(InitialCube, stop, g, h)
 
     EndTime = time.time()
-    TotalTime = EndTime - StartTime
+    NewTotalTime = EndTime - StartTime + TotalTime
 
     # Results
     if solution is not None:
         print(f"Solution found in {len(solution)-1} movements.")
-        print(f"Total Time: {TotalTime:.2f} seconds\n")
+        print(f"Total Time: {NewTotalTime:.2f} seconds\n")
         print("Solution path:\n")
 
         for i, state in enumerate(solution):
