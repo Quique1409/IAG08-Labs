@@ -72,7 +72,6 @@ def prob_k_steps(P, v0, k):
 
 def expected_moves(P):
     """
-    Calcula el número esperado de movimientos para ganar
     Calculates the average numbers of moves to win
     using the fundamental matrix N = (I - Q)^-1
     """
