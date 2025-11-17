@@ -129,7 +129,7 @@ def main():
         print(f"PROBABILITY OF HAVING WON: {prob_25[100]:.6%}")
     print("-" * 30)
 
-    print("--- Probability of being in each box after 505 moves ---")
+    print("--- Probability of being in each box after 50 moves ---")
     v_50 = prob_k_steps(P, v0, 50)
     if v_50 is not None:
         prob_50 = v_50.flatten() 
