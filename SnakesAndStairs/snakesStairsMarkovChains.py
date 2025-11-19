@@ -1,5 +1,5 @@
 import numpy as np
-import time  # To measure how long it takes to calculate the fundamental matrix
+import time
 
 # Printing in a more legible way numpy objects in terminal 
 np.set_printoptions(precision=4, suppress=True)
@@ -58,16 +58,32 @@ def transitionMatrix_creation(N_States, n_Faces, jump_map):
     
     return P
 
-def prob_k_steps(P, v0, k):
+def prob_k_steps(M, v0, k):
     """
      v_k = v0 * P^k
     """
     try:
-        P_k = np.linalg.matrix_power(P, k) #Elevates matrix P to the power of k
+        start_time = time.time()
+        P_k = np.linalg.matrix_power(M, k) #Elevaxtes matrix M to the power of k
         v_k = v0 @ P_k #Matrix multiplication
-        return v_k #Return the probability of being in all states after k moves
-    except np.linalg.LinAlgError as e: #Failsafe
+        end_time = time.time()
+        print(f"(Calculating P^{k} and then multiplying v_k: {end_time - start_time:.4f}s)")
+        return v_k #Return the vector of probabilities of being in all states after k moves
+    except np.linalg.LinAlgError as e: 
         print(f"Error obtaining P^{k}: {e}")
+        return None
+
+def iterative_prob_k_steps(M, v0, k):
+    v_k = v0.copy()
+    try:
+        start_time = time.time()
+        for step in range(k):
+            v_k = v_k @ M  # Matrix multiplication
+        end_time = time.time()
+        print(f"(Calculating v_k iteratively: {end_time - start_time:.4f}s)")
+        return v_k  # Return the vector of probabilities of being in all states after k moves
+    except np.linalg.LinAlgError as e:
+        print(f"Error obtaining v_{k} iteratively: {e}")
         return None
 
 def expected_moves(P):
@@ -122,21 +138,23 @@ def main():
     
     print("--- Probability of being in each box after 25 moves ---")
     v_25 = prob_k_steps(P, v0, 25)
+    v2_25 = iterative_prob_k_steps(P, v0, 25)  # Just to compare times
     if v_25 is not None:
         prob_25 = v_25.flatten() # Transforms the 2D array into a 1D array, facilitating the iteration
         for i in range(N_States):
             # {i:3d} alingment of the numbers
             print(f"  Box {i:3d}: {prob_25[i]:.6%}")
         print(f"PROBABILITY OF HAVING WON: {prob_25[100]:.6%}")
-    print("-" * 30)
 
     print("--- Probability of being in each box after 50 moves ---")
     v_50 = prob_k_steps(P, v0, 50)
+    v2_50 = iterative_prob_k_steps(P, v0, 50)  # Just to compare times
     if v_50 is not None:
         prob_50 = v_50.flatten() 
         for i in range(N_States):
             print(f"  Box {i:3d}: {prob_50[i]:.6%}")
         print(f"PROBABILITY OF HAVING WON: {prob_50[100]:.6%}")
+    print("-" * 30)
     print("-" * 30)
 
     print("---Expected number of moves ---")

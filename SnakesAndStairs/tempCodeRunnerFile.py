@@ -1,11 +1,12 @@
-def expected_moves(P):
-    """
-    Calculates the average numbers of moves to win
-    using the fundamental matrix N = (I - Q)^-1
-    """
-    # Q = Transtions between transient states (0-99 in our case)
-    transient_states = N_States - 1
-    Q = P[0:transient_states, 0:transient_states]
-    
-    # I = Identity matrix (same dimention as the number of transient states)
-    I = np.identity(transient_states)
+def iterative_prob_k_steps(M, v0, k):
+    v_k = v0.copy()
+    try:
+        start_time = time.time()
+        for step in range(k):
+            v_k = v_k @ M  # Matrix multiplication
+        end_time = time.time()
+        print(f"(Calculating v_k iteratively took {end_time - start_time:.4f}s)")
+        return v_k  # Return the vector of probabilities of being in all states after k moves
+    except np.linalg.LinAlgError as e:
+        print(f"Error obtaining v_{k} iteratively: {e}")
+        return None
