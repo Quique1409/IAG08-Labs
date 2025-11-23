@@ -1,3 +1,6 @@
 # Archivos de cache de Python
 __pycache__/
 *.pyc
+
+# Ignorar toda la carpeta del dataset y su contenido
+dataSet/
