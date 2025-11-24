@@ -5,7 +5,7 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 
-MODEL_PATH = 'FinalProject/models_components.keras' 
+MODEL_PATH = 'FinalProject/models_components_250.keras' 
 
 IMG_SIZE = 150 
 
