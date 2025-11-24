@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 def get_jump_map():
     #map for snakes and stairs
     jump_map = {
@@ -7,3 +8,6 @@ def get_jump_map():
         96: 58, 89: 47, 80: 39, 66: 1, 44: 26, 52: 49, 37: 18, 47: 9
     }
     return jump_map
+=======
+v0
+>>>>>>> origin/main
