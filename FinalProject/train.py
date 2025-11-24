@@ -74,12 +74,13 @@ model.compile(optimizer='adam',
             metrics=['accuracy'])
 
 # Training
-epochs = 100
+epochs = 5000
 history = model.fit(
     train_ds,
     validation_data=val_ds,
     epochs=epochs)
 
 # Model Saved
-model.save('models_components.h5')
-print("Training completed")
+path_to_save = os.path.join(base_dir, 'models_components.keras')
+model.save(path_to_save)
+print("Training completed and saved file at:", path_to_save)

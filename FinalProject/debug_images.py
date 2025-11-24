@@ -36,8 +36,8 @@ for root, dirs, files in os.walk(data_dir):
             print(f"   Error: {e}")
             
             # Opcional: Borrarlo automáticamente
-            # os.remove(filepath) 
-            # print("   ---> Borrado.")
+            os.remove(filepath) 
+            print("   ---> Borrado.")
             
             files_corrupt += 1
 
